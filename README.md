@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sentrix Scan
 
-## Getting Started
+Block explorer for Sentrix Chain (SRX) — browse blocks, transactions, addresses, validators, and SRC-20 tokens.
 
-First, run the development server:
+**Mainnet:** https://sentrixscan.sentriscloud.com
+**Testnet:** https://testnet-scan.sentriscloud.com
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech Stack
+
+- Next.js 15 (App Router, standalone output)
+- TypeScript
+- Tailwind CSS 4 + shadcn/ui
+- lucide-react (icons)
+- recharts (charts — ready for future tx/gas charts)
+- viem (EVM RPC client)
+- next-themes (dark/light mode)
+- No database — queries chain RPC + REST API directly
+
+## Architecture
+
+```
+app/
+├── page.tsx                Home — stats dashboard + latest blocks/tx
+├── blocks/
+│   ├── page.tsx            All blocks list
+│   └── [height]/page.tsx   Block detail
+├── tx/
+│   └── [hash]/page.tsx     Transaction detail
+├── address/
+│   └── [addr]/page.tsx     Account detail (balance, history)
+├── validators/
+│   └── page.tsx            Validators list
+├── tokens/
+│   ├── page.tsx            SRC-20 tokens list
+│   └── [addr]/page.tsx     Token detail
+└── search/
+    └── page.tsx            Smart search
+
+lib/
+├── chain.ts                viem chain definitions (mainnet + testnet)
+├── api.ts                  REST API client
+├── hooks.ts                React hooks with polling
+├── format.ts               Number/hash/time formatting
+├── network-context.tsx     Network switcher context
+└── utils.ts                shadcn utilities
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Real-time stats (5s polling)
+- Smart search (block height / tx hash / address auto-detect)
+- Network switcher (Mainnet / Testnet)
+- Dark mode default + light toggle
+- Copy-to-clipboard on all hashes and addresses
+- Relative timestamps with hover for absolute
+- Responsive (mobile, tablet, desktop)
+- No database dependency
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Local Development
 
-## Learn More
+```bash
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Description | Default |
+|---|---|---|
+| NEXT_PUBLIC_MAINNET_RPC | Mainnet JSON-RPC | sentrix-rpc.sentriscloud.com/rpc |
+| NEXT_PUBLIC_MAINNET_API | Mainnet REST API | sentrix-api.sentriscloud.com |
+| NEXT_PUBLIC_MAINNET_CHAIN_ID | Mainnet chain ID | 7119 |
+| NEXT_PUBLIC_TESTNET_RPC | Testnet JSON-RPC | testnet-rpc.sentriscloud.com/rpc |
+| NEXT_PUBLIC_TESTNET_API | Testnet REST API | testnet-api.sentriscloud.com |
+| NEXT_PUBLIC_TESTNET_CHAIN_ID | Testnet chain ID | 7120 |
+| NEXT_PUBLIC_DEFAULT_NETWORK | Default network | mainnet |
 
-## Deploy on Vercel
+## Build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+### Systemd
+
+```
+Port 3006 (mainnet), Port 3007 (testnet)
+HOSTNAME=127.0.0.1 (bind localhost only, Nginx reverse proxy)
+```
+
+### Nginx
+
+```
+sentrixscan.sentriscloud.com → 127.0.0.1:3006
+testnet-scan.sentriscloud.com → 127.0.0.1:3007
+```
