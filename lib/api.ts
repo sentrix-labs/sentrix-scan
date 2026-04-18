@@ -88,24 +88,27 @@ export function fetchBlock(network: NetworkId, index: number) {
   return apiFetch<BlockData>(network, `/chain/blocks/${index}`);
 }
 
-export function fetchLatestBlocks(network: NetworkId, count = 10) {
-  return apiFetch<BlockData[]>(network, `/chain/blocks?limit=${count}`);
+export async function fetchLatestBlocks(network: NetworkId, count = 10) {
+  const res = await apiFetch<{ blocks: BlockData[] }>(network, `/chain/blocks?limit=${count}`);
+  return res.blocks ?? [];
 }
 
 export function fetchTransaction(network: NetworkId, txId: string) {
   return apiFetch<TransactionData>(network, `/transactions/${txId}`);
 }
 
-export function fetchLatestTransactions(network: NetworkId, count = 10) {
-  return apiFetch<TransactionData[]>(network, `/transactions?limit=${count}`);
+export async function fetchLatestTransactions(network: NetworkId, count = 10) {
+  const res = await apiFetch<{ transactions: TransactionData[] } | TransactionData[]>(network, `/transactions?limit=${count}`);
+  return Array.isArray(res) ? res : (res.transactions ?? []);
 }
 
 export function fetchAccountBalance(network: NetworkId, address: string) {
   return apiFetch<AccountBalance>(network, `/accounts/${address}/balance`);
 }
 
-export function fetchAccountHistory(network: NetworkId, address: string, page = 1) {
-  return apiFetch<TransactionData[]>(network, `/accounts/${address}/history?page=${page}`);
+export async function fetchAccountHistory(network: NetworkId, address: string, page = 1) {
+  const res = await apiFetch<{ transactions: TransactionData[] } | TransactionData[]>(network, `/accounts/${address}/history?page=${page}`);
+  return Array.isArray(res) ? res : (res.transactions ?? []);
 }
 
 export function fetchValidators(network: NetworkId) {
