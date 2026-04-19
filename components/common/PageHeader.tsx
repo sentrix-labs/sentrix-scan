@@ -27,7 +27,7 @@ export function PageHeader({ icon: Icon, iconSlot, eyebrow, title, mono = false,
   const bubble =
     tone === "gold"
       ? "bg-[color-mix(in_oklab,var(--gold)_12%,transparent)] text-[var(--gold)]"
-      : "bg-muted text-muted-foreground";
+      : "bg-muted text-muted-foreground border border-[var(--brd)]";
 
   return (
     <div className="flex items-center justify-between flex-wrap gap-3 mb-2">
