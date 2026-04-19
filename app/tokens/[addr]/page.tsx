@@ -2,10 +2,12 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { Coins } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CopyButton } from "@/components/copy-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Address } from "@/components/common/Address";
+import { InfoRow } from "@/components/common/InfoRow";
+import { Copyable } from "@/components/common/Copyable";
 import { useNetwork } from "@/lib/network-context";
 import { fetchToken, type TokenData } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
@@ -47,47 +49,119 @@ export default function TokenDetailPage({ params }: { params: Promise<{ addr: st
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center gap-3">
-        <Coins className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">{token.name} ({token.symbol})</h1>
+      {/* Header */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold shrink-0">
+          {token.symbol.slice(0, 2).toUpperCase()}
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            {token.name}
+            <span className="text-base text-muted-foreground font-normal">({token.symbol})</span>
+          </h1>
+          <div className="flex items-center gap-1 text-xs mt-0.5">
+            <Address address={token.contract_address} muted className="text-xs" />
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Token Info</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <InfoRow label="Name" value={token.name} />
-          <InfoRow label="Symbol" value={token.symbol} />
-          <InfoRow label="Decimals" value={String(token.decimals)} />
-          <InfoRow label="Total Supply" value={formatNumber(token.total_supply)} />
-          <div className="flex flex-col sm:flex-row gap-2 py-2 border-b border-border">
-            <span className="text-sm text-muted-foreground sm:w-48 shrink-0">Contract</span>
-            <div className="flex items-center gap-1">
-              <Link href={`/address/${token.contract_address}`} className="text-sm font-mono text-blue-500 hover:underline break-all">{token.contract_address}</Link>
-              <CopyButton text={token.contract_address} />
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2 py-2 border-b border-border">
-            <span className="text-sm text-muted-foreground sm:w-48 shrink-0">Owner</span>
-            <div className="flex items-center gap-1">
-              <Link href={`/address/${token.owner}`} className="text-sm font-mono text-blue-500 hover:underline break-all">{token.owner}</Link>
-              <CopyButton text={token.owner} />
-            </div>
-          </div>
-          {token.holders !== undefined && <InfoRow label="Holders" value={formatNumber(token.holders)} />}
-          {token.transfers !== undefined && <InfoRow label="Transfers" value={formatNumber(token.transfers)} />}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Total Supply</p>
+          <p className="text-lg font-semibold font-mono mt-1">{formatNumber(token.total_supply)}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Holders</p>
+          <p className="text-lg font-semibold font-mono mt-1">{token.holders !== undefined ? formatNumber(token.holders) : "-"}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Transfers</p>
+          <p className="text-lg font-semibold font-mono mt-1">{token.transfers !== undefined ? formatNumber(token.transfers) : "-"}</p>
+        </CardContent></Card>
+        <Card><CardContent className="p-4">
+          <p className="text-xs text-muted-foreground">Decimals</p>
+          <p className="text-lg font-semibold font-mono mt-1">{token.decimals}</p>
+        </CardContent></Card>
+      </div>
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col sm:flex-row gap-2 py-2 border-b border-border">
-      <span className="text-sm text-muted-foreground sm:w-48 shrink-0">{label}</span>
-      <span className="text-sm">{value}</span>
+      <Tabs defaultValue="transfers" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="transfers">Transfers</TabsTrigger>
+          <TabsTrigger value="holders">Holders</TabsTrigger>
+          <TabsTrigger value="info">Info</TabsTrigger>
+          <TabsTrigger value="contract">Contract</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="transfers">
+          <Card>
+            <CardContent className="p-8 text-center">
+              {/* TODO(api): needs GET /tokens/{address}/transfers — using placeholder */}
+              <p className="text-sm text-muted-foreground">Transfer history is not yet available.</p>
+              <p className="text-xs text-muted-foreground mt-2">Endpoint pending on the Sentrix Chain API.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="holders">
+          <Card>
+            <CardContent className="p-8 text-center">
+              {/* TODO(api): needs GET /tokens/{address}/holders — using placeholder */}
+              <p className="text-sm text-muted-foreground">Top holders list is not yet available.</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Total holders: <span className="font-mono">{token.holders !== undefined ? formatNumber(token.holders) : "-"}</span>
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="info">
+          <Card>
+            <CardContent className="px-6 py-0">
+              <InfoRow label="Name" value={token.name} />
+              <InfoRow label="Symbol" value={<span className="font-mono">{token.symbol}</span>} />
+              <InfoRow label="Decimals" value={<span className="font-mono">{token.decimals}</span>} />
+              <InfoRow label="Total Supply" value={<span className="font-mono">{formatNumber(token.total_supply)}</span>} />
+              <InfoRow
+                label="Contract"
+                value={
+                  <span className="inline-flex items-center gap-2 font-mono break-all">
+                    <Address address={token.contract_address} truncate={false} />
+                  </span>
+                }
+              />
+              <InfoRow
+                label="Owner"
+                value={<Address address={token.owner} truncate={false} />}
+                last
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="contract">
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Contract address</p>
+                <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                  <span className="text-sm font-mono break-all flex-1">{token.contract_address}</span>
+                  <Copyable text={token.contract_address} bare />
+                </div>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Owner</p>
+                <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+                  <span className="text-sm font-mono break-all flex-1">{token.owner}</span>
+                  <Copyable text={token.owner} bare />
+                </div>
+              </div>
+              {/* TODO(api): needs GET /accounts/{address}/code — contract bytecode pending */}
+              <p className="text-xs text-muted-foreground text-center pt-2">Contract bytecode viewer coming soon.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
