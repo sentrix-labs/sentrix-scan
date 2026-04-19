@@ -33,11 +33,17 @@ export default function BlocksPage() {
   }, [blocks, page]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center gap-3">
-        <Blocks className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        {blocks && <span className="text-sm text-muted-foreground">{t("most_recent", { count: blocks.length })}</span>}
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <Blocks className="h-5 w-5 text-blue-500" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        {blocks && (
+          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+            {t("most_recent", { count: blocks.length })}
+          </span>
+        )}
       </div>
 
       <Card>
@@ -64,9 +70,9 @@ export default function BlocksPage() {
                       <th className="px-4 py-2.5 font-medium">{t("validator")}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-border/60 row-hover">
                     {paged.map((block) => (
-                      <tr key={block.index} className="hover:bg-muted/50 transition-colors">
+                      <tr key={block.index}>
                         <td className="px-4 py-2.5">
                           <BlockHeight height={block.index} className="text-sm" />
                         </td>

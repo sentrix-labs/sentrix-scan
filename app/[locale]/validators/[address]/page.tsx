@@ -88,10 +88,15 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
   const st = statusLabel(validator.status);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       <div className="flex items-center gap-3 flex-wrap">
-        <Users className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">{validator.name || "Validator"}</h1>
+        <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+          <Users className="h-5 w-5 text-purple-500" />
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Validator</p>
+          <h1 className="text-2xl font-bold tracking-tight">{validator.name || "Unnamed"}</h1>
+        </div>
         <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.color}`}>
           {st.icon}
           {st.text}
@@ -178,9 +183,9 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
                           <th className="px-4 py-2.5 font-medium text-right">Transactions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border">
+                      <tbody className="divide-y divide-border/60 row-hover">
                         {pagedBlocks.map((b) => (
-                          <tr key={b.index} className="hover:bg-muted/50 transition-colors">
+                          <tr key={b.index}>
                             <td className="px-4 py-2.5"><BlockHeight height={b.index} /></td>
                             <td className="px-4 py-2.5 text-muted-foreground text-xs"><Timestamp timestamp={b.timestamp} /></td>
                             <td className="px-4 py-2.5 text-right">{b.transactions?.length || 0}</td>

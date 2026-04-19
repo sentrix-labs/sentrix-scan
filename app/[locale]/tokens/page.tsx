@@ -56,11 +56,17 @@ export default function TokensPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       <div className="flex items-center gap-3 flex-wrap">
-        <Coins className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        {tokens && <span className="text-sm text-muted-foreground">{t("total", { count: tokens.length })}</span>}
+        <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+          <Coins className="h-5 w-5 text-yellow-500" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        {tokens && (
+          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+            {t("total", { count: tokens.length })}
+          </span>
+        )}
       </div>
 
       <Card>
@@ -89,9 +95,9 @@ export default function TokensPage() {
                       <th className="px-4 py-2.5 font-medium text-right hidden lg:table-cell"><SortHeader label={t("transfers")} k="transfers" /></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-border/60 row-hover">
                     {paged.map((token, i) => (
-                      <tr key={token.contract_address} className="hover:bg-muted/50 transition-colors">
+                      <tr key={token.contract_address}>
                         <td className="px-4 py-2.5 text-muted-foreground">{(page - 1) * PAGE_SIZE + i + 1}</td>
                         <td className="px-4 py-2.5">
                           <Link href={`/tokens/${token.contract_address}`} className="inline-flex items-center gap-1">

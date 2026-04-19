@@ -57,20 +57,25 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
   const totalTxPages = Math.max(1, Math.ceil(txCount / TX_PAGE_SIZE));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <Blocks className="h-6 w-6 text-blue-500" />
-          <h1 className="text-2xl font-bold">Block #{block.index.toLocaleString()}</h1>
+          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+            <Blocks className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Block</p>
+            <h1 className="text-2xl font-bold tracking-tight font-mono">#{block.index.toLocaleString()}</h1>
+          </div>
         </div>
         <div className="flex gap-2">
           {blockHeight > 0 && (
-            <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5">
+            <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
               <ChevronLeft className="h-4 w-4" /> Prev
             </Link>
           )}
-          <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg px-3 py-1.5">
+          <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
             Next <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
@@ -167,9 +172,9 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
                           <th className="px-4 py-2.5 font-medium text-right">Fee</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border">
+                      <tbody className="divide-y divide-border/60 row-hover">
                         {pagedTxs.map((tx) => (
-                          <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
+                          <tr key={tx.id}>
                             <td className="px-4 py-2.5"><TxHash hash={tx.id} /></td>
                             <td className="px-4 py-2.5"><Address address={tx.from} muted showCopy={false} className="text-xs" /></td>
                             <td className="px-4 py-2.5"><Address address={tx.to} muted showCopy={false} className="text-xs" /></td>

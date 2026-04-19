@@ -32,15 +32,20 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 flex-wrap">
-        <Wallet className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">Address</h1>
+        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+          <Wallet className="h-5 w-5 text-blue-500" />
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Address</p>
+          <h1 className="text-2xl font-bold tracking-tight">Account</h1>
+        </div>
       </div>
 
       {/* Address bar */}
-      <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-3">
+      <div className="flex items-center gap-2 bg-muted/40 rounded-lg p-3 border border-border/60">
         <span className="text-sm font-mono break-all flex-1" data-address={addr}>{addr}</span>
         <Copyable text={addr} bare />
       </div>
@@ -119,14 +124,14 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
                           <th className="px-4 py-2.5 font-medium text-right">Amount</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border">
+                      <tbody className="divide-y divide-border/60 row-hover">
                         {filtered.map((tx) => {
                           const isIn = tx.to.toLowerCase() === addr.toLowerCase();
                           const isSelf = isIn && tx.from.toLowerCase() === addr.toLowerCase();
                           const dirIcon = isSelf ? <ArrowLeftRight className="h-3.5 w-3.5 text-muted-foreground" /> : isIn ? <ArrowDown className="h-3.5 w-3.5 text-green-500" /> : <ArrowUp className="h-3.5 w-3.5 text-red-500" />;
                           const success = tx.status !== "failed";
                           return (
-                            <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
+                            <tr key={tx.id}>
                               <td className="px-3 py-2.5">{dirIcon}</td>
                               <td className="px-4 py-2.5"><TxHash hash={tx.id} /></td>
                               <td className="px-4 py-2.5 text-muted-foreground text-xs">

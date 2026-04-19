@@ -59,10 +59,17 @@ export default function TxDetailPage({ params }: { params: Promise<{ hash: strin
   const success = tx.status !== "failed";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       <div className="flex items-center gap-3 flex-wrap">
-        <ArrowUpDown className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">Transaction</h1>
+        <div className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${success ? "bg-green-500/10" : "bg-red-500/10"}`}>
+          <ArrowUpDown className={`h-5 w-5 ${success ? "text-green-500" : "text-red-500"}`} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Transaction</p>
+          <h1 className="text-xl font-bold tracking-tight font-mono truncate" title={tx.id}>
+            {tx.id.slice(0, 10)}...{tx.id.slice(-6)}
+          </h1>
+        </div>
         <StatusBadge status={success ? "success" : "failed"} size="md" />
       </div>
 
