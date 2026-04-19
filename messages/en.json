@@ -18,8 +18,9 @@
     "balance": "Balance",
     "share": "% of Supply",
     "txs": "Txs",
-    "mock_notice": "Showing illustrative data. A live ranking endpoint is being wired up on the backend; until then, validator balances are real while other rows are placeholders.",
-    "partial_notice": "Real balances are shown for known validators; remaining rows are illustrative placeholders until /accounts/top ships.",
+    "partial_notice": "Showing validators with live balances. A full account ranking (GET /accounts/top) is pending on the Sentrix Chain API.",
+    "empty_title": "No balances indexed yet",
+    "empty_hint": "Once /accounts/top ships, the top SRX holders will appear here.",
     "active_soon": "Most active accounts is coming soon.",
     "active_soon_hint": "Endpoint /accounts/top?sort=tx_count pending on the Sentrix Chain API."
   },

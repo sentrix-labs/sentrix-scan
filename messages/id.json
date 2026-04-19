@@ -18,8 +18,9 @@
     "balance": "Saldo",
     "share": "% Pasokan",
     "txs": "Tx",
-    "mock_notice": "Menampilkan data ilustrasi. Endpoint ranking live sedang dipasang di backend; untuk sementara saldo validator asli, baris lain placeholder.",
-    "partial_notice": "Saldo asli ditampilkan untuk validator yang dikenal; baris lain placeholder sampai /accounts/top tersedia.",
+    "partial_notice": "Menampilkan validator dengan saldo asli. Ranking akun penuh (GET /accounts/top) menunggu di API Sentrix Chain.",
+    "empty_title": "Belum ada saldo ter-index",
+    "empty_hint": "Setelah /accounts/top tersedia, top holder SRX akan muncul di sini.",
     "active_soon": "Akun paling aktif segera hadir.",
     "active_soon_hint": "Endpoint /accounts/top?sort=tx_count menunggu di API Sentrix Chain."
   },

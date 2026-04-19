@@ -53,7 +53,9 @@ function useLeaderboard() {
   const totalSupply = stats?.total_minted_srx ?? 210_000_000;
 
   const rows = useMemo<LeaderboardRow[]>(() => {
-    const real: LeaderboardRow[] = (validators ?? [])
+    // DECISION: only show real validator balances. Skip mock padding — it read as fake on first
+    // look and made the page feel broken. Real ranking will replace this when /accounts/top ships.
+    return (validators ?? [])
       .map((v) => {
         const bal = balances[v.address];
         const balance = bal?.balance ?? 0;
@@ -67,35 +69,17 @@ function useLeaderboard() {
           isMock: false,
         };
       })
-      .filter((r) => r.balance > 0);
-
-    // Pad with deterministic mock rows so the page looks populated
-    const MOCK_NAMES = ["Exchange Hot Wallet", "Community Pool", "Ecosystem Fund", "Team Vesting", "LP Reserve", "Bridge", "Airdrop", "Grants", "Dev Fund", "Marketing"];
-    const mocks: LeaderboardRow[] = MOCK_NAMES.map((name, i) => {
-      const balance = Math.max(100, 2_000_000 / Math.pow(1.7, i));
-      const addr = `0x${(i + 1).toString(16).padStart(2, "0")}${"a".repeat(38)}`.slice(0, 42);
-      return {
-        rank: 0,
-        address: addr,
-        name,
-        balance,
-        share: totalSupply > 0 ? (balance / totalSupply) * 100 : 0,
-        txCount: Math.floor(1000 / Math.pow(1.3, i)),
-        isMock: true,
-      };
-    });
-
-    return [...real, ...mocks]
+      .filter((r) => r.balance > 0)
       .sort((a, b) => b.balance - a.balance)
       .map((r, i) => ({ ...r, rank: i + 1 }));
   }, [validators, balances, totalSupply]);
 
-  return { rows, loading: !loaded && rows.length === 0, hasRealData: Object.keys(balances).length > 0 };
+  return { rows, loading: !loaded && rows.length === 0 };
 }
 
 export default function LeaderboardPage() {
   const t = useTranslations("leaderboard");
-  const { rows, loading, hasRealData } = useLeaderboard();
+  const { rows, loading } = useLeaderboard();
   const [sortKey, setSortKey] = useState<SortKey>("balance");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
@@ -143,11 +127,11 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      {/* Mock data notice */}
+      {/* Notice */}
       <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 text-sm">
         <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
         <div className="text-xs text-muted-foreground leading-relaxed">
-          {hasRealData ? t("partial_notice") : t("mock_notice")}
+          {t("partial_notice")}
         </div>
       </div>
 
@@ -166,6 +150,12 @@ export default function LeaderboardPage() {
               {loading ? (
                 <div className="p-4 space-y-2">
                   {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" style={{ opacity: 1 - i * 0.08 }} />)}
+                </div>
+              ) : sorted.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Trophy className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">{t("empty_title")}</p>
+                  <p className="text-xs text-muted-foreground/80 mt-1">{t("empty_hint")}</p>
                 </div>
               ) : (
                 <>
@@ -196,20 +186,13 @@ export default function LeaderboardPage() {
                             <td className="px-4 py-2.5">
                               <div className="flex flex-col gap-0.5">
                                 {r.name && (
-                                  <span className="inline-flex items-center gap-1.5 font-medium text-sm">
-                                    {r.name}
-                                    {r.isMock && (
-                                      <span className="text-[10px] px-1.5 py-0 rounded bg-muted text-muted-foreground font-mono uppercase">mock</span>
-                                    )}
-                                  </span>
+                                  <span className="font-medium text-sm">{r.name}</span>
                                 )}
                                 <Address address={r.address} muted className="text-xs" />
                               </div>
                             </td>
                             <td className="px-4 py-2.5 text-right font-mono">
-                              <span className={r.isMock ? "text-muted-foreground" : ""}>
-                                {formatNumber(r.balance)} SRX
-                              </span>
+                              {formatNumber(r.balance)} SRX
                             </td>
                             <td className="px-4 py-2.5 text-right font-mono hidden md:table-cell text-muted-foreground">
                               {r.share.toFixed(4)}%
