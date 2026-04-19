@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import {
@@ -13,6 +14,7 @@ import { Address } from "@/components/common/Address";
 import { TxHash } from "@/components/common/TxHash";
 import { BlockHeight } from "@/components/common/BlockHeight";
 import { Timestamp } from "@/components/common/Timestamp";
+import { StatsChart } from "@/components/home/StatsChart";
 import { useNetwork } from "@/lib/network-context";
 import { useStats, useBlocks, useTransactions } from "@/lib/hooks";
 import { formatNumber, formatSRX } from "@/lib/format";
@@ -66,11 +68,12 @@ function computeBlockTime(timestamps: string[]): string {
 }
 
 export default function HomePage() {
+  const t = useTranslations("home");
   const { network } = useNetwork();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const { data: stats, loading: statsLoading } = useStats(network);
-  const { data: blocks, loading: blocksLoading } = useBlocks(network, 10);
+  const { data: blocks, loading: blocksLoading } = useBlocks(network, 30);
   const { data: txs, loading: txsLoading } = useTransactions(network, 10);
 
   const blockTime = blocks ? computeBlockTime(blocks.map((b) => b.timestamp)) : "~3s";
@@ -92,10 +95,10 @@ export default function HomePage() {
       {/* Hero search */}
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold">
-          Sentrix <span className="text-blue-500">Scan</span>
+          {t("title_prefix")} <span className="text-blue-500">{t("title_suffix")}</span>
         </h1>
         <p className="text-muted-foreground text-sm">
-          Block explorer for Sentrix Chain
+          {t("description")}
           <span className="inline-flex items-center gap-1.5 ml-2 text-xs px-2 py-0.5 rounded-full bg-muted">
             <span className={`w-1.5 h-1.5 rounded-full ${network === "mainnet" ? "bg-green-500" : "bg-orange-500"}`} />
             {network === "mainnet" ? "Chain ID 7119" : "Chain ID 7120"}
@@ -107,7 +110,7 @@ export default function HomePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search by block height, tx hash, or address..."
+              placeholder={t("search_placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full h-12 pl-12 pr-4 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-sm"
@@ -122,17 +125,20 @@ export default function HomePage() {
           Array.from({ length: 8 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <StatCard icon={Blocks} label="Block Height" value={stats ? formatNumber(stats.height) : "-"} loading={statsLoading} />
-            <StatCard icon={Clock} label="Block Time" value={blockTime} loading={false} iconColor="text-cyan-500" iconBg="bg-cyan-500/10" />
-            <StatCard icon={Users} label="Active Validators" value={stats ? String(stats.active_validators) : "-"} loading={statsLoading} iconColor="text-purple-500" iconBg="bg-purple-500/10" />
-            <StatCard icon={Activity} label="Mempool" value={stats ? `${stats.mempool_size} tx` : "-"} loading={statsLoading} iconColor="text-orange-500" iconBg="bg-orange-500/10" />
-            <StatCard icon={Layers} label="Total Minted" value={stats ? formatSRX(stats.total_minted_srx) : "-"} loading={statsLoading} iconColor="text-green-500" iconBg="bg-green-500/10" />
-            <StatCard icon={ArrowUpDown} label="Total Burned" value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "-"} loading={statsLoading} iconColor="text-red-500" iconBg="bg-red-500/10" />
-            <StatCard icon={Coins} label="Tokens Deployed" value={stats ? String(stats.deployed_tokens) : "-"} loading={statsLoading} iconColor="text-yellow-500" iconBg="bg-yellow-500/10" />
-            <StatCard icon={Gift} label="Block Reward" value={stats ? `${stats.next_block_reward_srx} SRX` : "-"} loading={statsLoading} iconColor="text-pink-500" iconBg="bg-pink-500/10" />
+            <StatCard icon={Blocks} label={t("stats.block_height")} value={stats ? formatNumber(stats.height) : "-"} loading={statsLoading} />
+            <StatCard icon={Clock} label={t("stats.block_time")} value={blockTime} loading={false} iconColor="text-cyan-500" iconBg="bg-cyan-500/10" />
+            <StatCard icon={Users} label={t("stats.active_validators")} value={stats ? String(stats.active_validators) : "-"} loading={statsLoading} iconColor="text-purple-500" iconBg="bg-purple-500/10" />
+            <StatCard icon={Activity} label={t("stats.mempool")} value={stats ? `${stats.mempool_size} tx` : "-"} loading={statsLoading} iconColor="text-orange-500" iconBg="bg-orange-500/10" />
+            <StatCard icon={Layers} label={t("stats.total_minted")} value={stats ? formatSRX(stats.total_minted_srx) : "-"} loading={statsLoading} iconColor="text-green-500" iconBg="bg-green-500/10" />
+            <StatCard icon={ArrowUpDown} label={t("stats.total_burned")} value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "-"} loading={statsLoading} iconColor="text-red-500" iconBg="bg-red-500/10" />
+            <StatCard icon={Coins} label={t("stats.tokens_deployed")} value={stats ? String(stats.deployed_tokens) : "-"} loading={statsLoading} iconColor="text-yellow-500" iconBg="bg-yellow-500/10" />
+            <StatCard icon={Gift} label={t("stats.block_reward")} value={stats ? `${stats.next_block_reward_srx} SRX` : "-"} loading={statsLoading} iconColor="text-pink-500" iconBg="bg-pink-500/10" />
           </>
         )}
       </div>
+
+      {/* TPS chart */}
+      <StatsChart blocks={blocks} />
 
       {/* Latest blocks + transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -142,9 +148,9 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <Blocks className="h-4 w-4 text-blue-500" />
-                Latest Blocks
+                {t("latest_blocks")}
               </CardTitle>
-              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">View all</Link>
+              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">{t("view_all")}</Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-0 p-0">
@@ -154,7 +160,7 @@ export default function HomePage() {
               </div>
             ) : blocks && blocks.length > 0 ? (
               <div className="divide-y divide-border">
-                {blocks.map((block) => (
+                {blocks.slice(0, 10).map((block) => (
                   <div key={block.index} className="px-4 py-3 flex items-center justify-between gap-4 hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -181,7 +187,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center text-sm text-muted-foreground">No blocks available. Chain might be unreachable.</div>
+              <div className="p-8 text-center text-sm text-muted-foreground">{t("no_blocks")}</div>
             )}
           </CardContent>
         </Card>
@@ -192,9 +198,9 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
                 <ArrowUpDown className="h-4 w-4 text-blue-500" />
-                Latest Transactions
+                {t("latest_transactions")}
               </CardTitle>
-              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">View all</Link>
+              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">{t("view_all")}</Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-0 p-0">
@@ -230,7 +236,7 @@ export default function HomePage() {
                 })}
               </div>
             ) : (
-              <div className="p-8 text-center text-sm text-muted-foreground">No transactions yet.</div>
+              <div className="p-8 text-center text-sm text-muted-foreground">{t("no_transactions")}</div>
             )}
           </CardContent>
         </Card>

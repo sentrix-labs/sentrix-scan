@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Blocks } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Address } from "@/components/common/Address";
@@ -17,6 +18,7 @@ const PAGE_SIZE = 25;
 const BATCH = 100;
 
 export default function BlocksPage() {
+  const t = useTranslations("blocks");
   const { network } = useNetwork();
   // DECISION: fetch a rolling batch (100) and paginate client-side — backend has no pagination endpoint yet.
   // TODO(api): needs GET /chain/blocks?page=N&limit=M — using client-side slice for now
@@ -34,14 +36,14 @@ export default function BlocksPage() {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center gap-3">
         <Blocks className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">Blocks</h1>
-        {blocks && <span className="text-sm text-muted-foreground">{blocks.length} most recent</span>}
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        {blocks && <span className="text-sm text-muted-foreground">{t("most_recent", { count: blocks.length })}</span>}
       </div>
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm text-muted-foreground font-normal">
-            Latest blocks on {network === "mainnet" ? "Mainnet (Chain ID 7119)" : "Testnet (Chain ID 7120)"}
+            {network === "mainnet" ? t("subtitle_mainnet") : t("subtitle_testnet")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -55,11 +57,11 @@ export default function BlocksPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
-                      <th className="px-4 py-2.5 font-medium">Block</th>
-                      <th className="px-4 py-2.5 font-medium">Age</th>
-                      <th className="px-4 py-2.5 font-medium text-center">Txs</th>
-                      <th className="px-4 py-2.5 font-medium hidden md:table-cell">Hash</th>
-                      <th className="px-4 py-2.5 font-medium">Validator</th>
+                      <th className="px-4 py-2.5 font-medium">{t("block")}</th>
+                      <th className="px-4 py-2.5 font-medium">{t("age")}</th>
+                      <th className="px-4 py-2.5 font-medium text-center">{t("txs")}</th>
+                      <th className="px-4 py-2.5 font-medium hidden md:table-cell">{t("hash")}</th>
+                      <th className="px-4 py-2.5 font-medium">{t("validator")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -90,7 +92,7 @@ export default function BlocksPage() {
                   </tbody>
                 </table>
                 {(!blocks || blocks.length === 0) && (
-                  <div className="p-8 text-center text-sm text-muted-foreground">No blocks found.</div>
+                  <div className="p-8 text-center text-sm text-muted-foreground">{t("no_blocks")}</div>
                 )}
               </div>
               {blocks && blocks.length > PAGE_SIZE && (

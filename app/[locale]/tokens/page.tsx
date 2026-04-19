@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Coins, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ type SortKey = "supply" | "holders" | "transfers" | "none";
 const PAGE_SIZE = 25;
 
 export default function TokensPage() {
+  const t = useTranslations("tokens");
   const { network } = useNetwork();
   const { data: tokens, loading } = useTokens(network);
   const [sortKey, setSortKey] = useState<SortKey>("none");
@@ -57,14 +59,14 @@ export default function TokensPage() {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center gap-3 flex-wrap">
         <Coins className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">SRC-20 Tokens</h1>
-        {tokens && <span className="text-sm text-muted-foreground">{tokens.length} total</span>}
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        {tokens && <span className="text-sm text-muted-foreground">{t("total", { count: tokens.length })}</span>}
       </div>
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm text-muted-foreground font-normal">
-            Deployed tokens on {network === "mainnet" ? "Mainnet" : "Testnet"}
+            {network === "mainnet" ? t("subtitle_mainnet") : t("subtitle_testnet")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -79,12 +81,12 @@ export default function TokensPage() {
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
                       <th className="px-4 py-2.5 font-medium w-10">#</th>
-                      <th className="px-4 py-2.5 font-medium">Token</th>
-                      <th className="px-4 py-2.5 font-medium">Contract</th>
-                      <th className="px-4 py-2.5 font-medium text-right">Decimals</th>
-                      <th className="px-4 py-2.5 font-medium text-right"><SortHeader label="Supply" k="supply" /></th>
-                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell"><SortHeader label="Holders" k="holders" /></th>
-                      <th className="px-4 py-2.5 font-medium text-right hidden lg:table-cell"><SortHeader label="Transfers" k="transfers" /></th>
+                      <th className="px-4 py-2.5 font-medium">{t("token")}</th>
+                      <th className="px-4 py-2.5 font-medium">{t("contract")}</th>
+                      <th className="px-4 py-2.5 font-medium text-right">{t("decimals")}</th>
+                      <th className="px-4 py-2.5 font-medium text-right"><SortHeader label={t("supply")} k="supply" /></th>
+                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell"><SortHeader label={t("holders")} k="holders" /></th>
+                      <th className="px-4 py-2.5 font-medium text-right hidden lg:table-cell"><SortHeader label={t("transfers")} k="transfers" /></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -127,7 +129,7 @@ export default function TokensPage() {
             </>
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              No SRC-20 tokens deployed yet.
+              {t("no_tokens")}
             </div>
           )}
         </CardContent>

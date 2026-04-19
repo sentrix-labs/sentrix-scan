@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Users, CheckCircle, XCircle, AlertTriangle, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ function StatusIcon({ status }: { status?: string }) {
 }
 
 export default function ValidatorsPage() {
+  const t = useTranslations("validators");
   const { network } = useNetwork();
   const { data: validators, loading } = useValidators(network);
   const [sortKey, setSortKey] = useState<SortKey>("none");
@@ -89,9 +91,9 @@ export default function ValidatorsPage() {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center gap-3 flex-wrap">
         <Users className="h-6 w-6 text-blue-500" />
-        <h1 className="text-2xl font-bold">Validators</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
         {validators && (
-          <span className="text-sm text-muted-foreground">{validators.length} total</span>
+          <span className="text-sm text-muted-foreground">{t("total", { count: validators.length })}</span>
         )}
       </div>
 
@@ -99,25 +101,25 @@ export default function ValidatorsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Staked</p>
+            <p className="text-xs text-muted-foreground">{t("total_staked")}</p>
             <p className="text-lg font-semibold font-mono mt-1">{formatNumber(summary.totalStake)} SRX</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Active</p>
+            <p className="text-xs text-muted-foreground">{t("active")}</p>
             <p className="text-lg font-semibold text-green-500 mt-1">{summary.active}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Inactive</p>
+            <p className="text-xs text-muted-foreground">{t("inactive")}</p>
             <p className="text-lg font-semibold text-red-500 mt-1">{summary.inactive}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Jailed</p>
+            <p className="text-xs text-muted-foreground">{t("jailed")}</p>
             <p className="text-lg font-semibold text-orange-500 mt-1">{summary.jailed}</p>
           </CardContent>
         </Card>
@@ -127,7 +129,7 @@ export default function ValidatorsPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <CardTitle className="text-sm text-muted-foreground font-normal">
-              Active validators on {network === "mainnet" ? "Mainnet (Chain ID 7119)" : "Testnet (Chain ID 7120)"}
+              {network === "mainnet" ? "Chain ID 7119 (Mainnet)" : "Chain ID 7120 (Testnet)"}
             </CardTitle>
             <div className="flex items-center gap-1">
               {(["all", "active", "inactive", "jailed"] as const).map((s) => (
@@ -158,12 +160,12 @@ export default function ValidatorsPage() {
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
                       <th className="px-4 py-2.5 font-medium w-10">#</th>
-                      <th className="px-4 py-2.5 font-medium">Validator</th>
-                      <th className="px-4 py-2.5 font-medium">Status</th>
-                      <th className="px-4 py-2.5 font-medium text-right"><SortHeader label="Blocks" k="blocks" /></th>
-                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell"><SortHeader label="Stake" k="stake" /></th>
-                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell">Commission</th>
-                      <th className="px-4 py-2.5 font-medium text-right hidden lg:table-cell"><SortHeader label="Uptime" k="uptime" /></th>
+                      <th className="px-4 py-2.5 font-medium">{t("validator")}</th>
+                      <th className="px-4 py-2.5 font-medium">{t("status")}</th>
+                      <th className="px-4 py-2.5 font-medium text-right"><SortHeader label={t("blocks")} k="blocks" /></th>
+                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell"><SortHeader label={t("stake")} k="stake" /></th>
+                      <th className="px-4 py-2.5 font-medium text-right hidden md:table-cell">{t("commission")}</th>
+                      <th className="px-4 py-2.5 font-medium text-right hidden lg:table-cell"><SortHeader label={t("uptime")} k="uptime" /></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -215,7 +217,7 @@ export default function ValidatorsPage() {
             </>
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              No validators match the selected filter.
+              {t("no_validators")}
             </div>
           )}
         </CardContent>
