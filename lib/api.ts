@@ -56,6 +56,8 @@ export interface ValidatorData {
   address: string;
   name: string;
   status?: string;
+  is_active?: boolean;
+  registered_at?: number;
   blocks_produced?: number;
   stake?: number;
   commission?: number;
@@ -113,12 +115,22 @@ export async function fetchAccountHistory(network: NetworkId, address: string, p
   return Array.isArray(res) ? res : (res.transactions ?? []);
 }
 
-export function fetchValidators(network: NetworkId) {
-  return apiFetch<ValidatorData[]>(network, "/validators");
+export async function fetchValidators(network: NetworkId) {
+  const res = await apiFetch<{ validators: ValidatorData[] } | ValidatorData[]>(network, "/validators");
+  if (!res) return [];
+  // DECISION: backend wraps as { validators: [...] } with is_active flag; normalize to the shape
+  // the UI expects so existing filter/sort code keeps working.
+  const list = Array.isArray(res) ? res : (res.validators ?? []);
+  return list.map((v) => ({
+    ...v,
+    status: v.status ?? (v.is_active === false ? "inactive" : "active"),
+  }));
 }
 
-export function fetchTokens(network: NetworkId) {
-  return apiFetch<TokenData[]>(network, "/tokens");
+export async function fetchTokens(network: NetworkId) {
+  const res = await apiFetch<{ tokens: TokenData[] } | TokenData[]>(network, "/tokens");
+  if (!res) return [];
+  return Array.isArray(res) ? res : (res.tokens ?? []);
 }
 
 export function fetchToken(network: NetworkId, address: string) {
