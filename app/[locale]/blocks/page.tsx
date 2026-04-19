@@ -63,7 +63,11 @@ export default function BlocksPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
-                      <th className="px-4 py-2.5 font-medium">{t("block")}</th>
+                      <th className="px-4 py-2.5 font-medium" title={t("block_hint")}>
+                        <span className="inline-flex items-center gap-1 cursor-help decoration-dotted underline-offset-2 underline">
+                          {t("block")}
+                        </span>
+                      </th>
                       <th className="px-4 py-2.5 font-medium">{t("age")}</th>
                       <th className="px-4 py-2.5 font-medium text-center">{t("txs")}</th>
                       <th className="px-4 py-2.5 font-medium hidden md:table-cell">{t("hash")}</th>

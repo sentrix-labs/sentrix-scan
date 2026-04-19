@@ -1,0 +1,79 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Sentrix SENTRIXScan" [ref=e4] [cursor=pointer]:
+        - /url: /en
+        - img "Sentrix" [ref=e5]
+        - generic [ref=e6]: SENTRIXScan
+      - navigation [ref=e7]:
+        - link "Home" [ref=e8] [cursor=pointer]:
+          - /url: /en
+        - link "Blocks" [ref=e9] [cursor=pointer]:
+          - /url: /en/blocks
+        - link "Validators" [ref=e10] [cursor=pointer]:
+          - /url: /en/validators
+        - link "Tokens" [ref=e11] [cursor=pointer]:
+          - /url: /en/tokens
+        - button "Leaderboard" [ref=e13]:
+          - text: Leaderboard
+          - img [ref=e14]
+      - generic [ref=e17]:
+        - img [ref=e18]
+        - textbox "Search by block / tx / address..." [ref=e21]
+        - generic [ref=e22]: ⌘K
+      - generic [ref=e23]:
+        - button "Switch language" [ref=e25]:
+          - img [ref=e26]
+          - generic [ref=e29]: en
+        - button "Mainnet 7119" [ref=e30]:
+          - generic [ref=e32]: Mainnet
+          - generic [ref=e33]: "7119"
+        - button "Toggle theme" [ref=e34]:
+          - img [ref=e35]
+  - main [ref=e37]
+  - contentinfo [ref=e41]:
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - img "Sentrix" [ref=e46]
+            - generic [ref=e47]: SENTRIXScan
+          - paragraph [ref=e48]: Block explorer for Sentrix Chain (SRX). Blocks, transactions, validators, and SRC-20 tokens — all in one place.
+        - generic [ref=e49]:
+          - heading "Explorer" [level=3] [ref=e50]
+          - navigation [ref=e51]:
+            - link "Home" [ref=e52] [cursor=pointer]:
+              - /url: /en
+            - link "Blocks" [ref=e53] [cursor=pointer]:
+              - /url: /en/blocks
+            - link "Validators" [ref=e54] [cursor=pointer]:
+              - /url: /en/validators
+            - link "Tokens" [ref=e55] [cursor=pointer]:
+              - /url: /en/tokens
+            - link "Leaderboard" [ref=e56] [cursor=pointer]:
+              - /url: /en/leaderboard/account/holders
+        - generic [ref=e57]:
+          - heading "Network" [level=3] [ref=e58]
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: Mainnet
+              - generic [ref=e62]: "7119"
+            - generic [ref=e63]:
+              - generic [ref=e64]: Testnet
+              - generic [ref=e65]: "7120"
+            - generic [ref=e66]:
+              - generic [ref=e67]: Currency
+              - generic [ref=e68]: SRX
+        - generic [ref=e69]:
+          - heading "Resources" [level=3] [ref=e70]
+          - navigation [ref=e71]:
+            - link "Sentrix Chain" [ref=e72] [cursor=pointer]:
+              - /url: https://sentrix.sentriscloud.com
+            - link "GitHub" [ref=e73] [cursor=pointer]:
+              - /url: https://github.com/sentrix-labs
+            - link "Telegram" [ref=e74] [cursor=pointer]:
+              - /url: https://t.me/SentrixCommunity
+      - generic [ref=e75]:
+        - paragraph [ref=e76]: © 2026 Sentrix Labs. Open source block explorer.
+        - paragraph [ref=e77]: v0.2.0
+  - region "Notifications alt+T"

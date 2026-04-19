@@ -65,7 +65,7 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
             <Blocks className="h-5 w-5 text-blue-500" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Block</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">Block Height</p>
             <h1 className="text-2xl font-bold tracking-tight font-mono">#{block.index.toLocaleString()}</h1>
           </div>
         </div>

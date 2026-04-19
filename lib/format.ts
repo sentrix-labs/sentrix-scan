@@ -23,7 +23,7 @@ export function shortenAddress(address: string): string {
 
 // DECISION: API returns unix seconds (10 digits, e.g. 1776597784). JS Date expects ms.
 // Any numeric timestamp below 1e12 is treated as seconds and scaled up.
-function toMillis(timestamp: string | number): number {
+export function toMillis(timestamp: string | number): number {
   if (typeof timestamp === "string") {
     const n = Number(timestamp);
     if (Number.isFinite(n)) return n < 1e12 ? n * 1000 : n;

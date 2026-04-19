@@ -22,7 +22,7 @@ const StatsChart = dynamic(() => import("@/components/home/StatsChart").then((m)
   loading: () => <Skeleton className="h-72 w-full" />,
 });
 import { useStats, useBlocks, useTransactions } from "@/lib/hooks";
-import { formatNumber, formatSRX } from "@/lib/format";
+import { formatNumber, formatSRX, toMillis } from "@/lib/format";
 import { detectSearchType } from "@/lib/format";
 
 // Split a formatted value (e.g. "14.2K", "3.1s", "12 tx", "14,109 SRX") into a number part
@@ -83,17 +83,35 @@ function StatCard({
   );
 }
 
-// DECISION: compute block time from last N blocks instead of hardcoded "~3s"
-function computeBlockTime(timestamps: string[]): string {
-  if (timestamps.length < 2) return "~3s";
-  const sorted = timestamps.map((t) => new Date(t).getTime()).sort((a, b) => b - a);
-  const diffs: number[] = [];
-  for (let i = 0; i < sorted.length - 1; i++) {
-    diffs.push(sorted[i] - sorted[i + 1]);
-  }
-  const avg = diffs.reduce((a, b) => a + b, 0) / diffs.length / 1000;
-  if (!isFinite(avg) || avg <= 0) return "~3s";
-  return `${avg.toFixed(1)}s`;
+// Compute block time from last N blocks.
+// DECISION: API sends block_timestamp as unix seconds (10-digit number). `toMillis` normalizes
+// to ms first. Average = span / (N-1) across the window — works even at second precision
+// because the sum of integer-second diffs equals the true span.
+const CHAIN_TARGET_BLOCK_TIME = "~0.5s";
+function computeBlockTime(timestamps: Array<string | number>): string {
+  if (timestamps.length < 2) return CHAIN_TARGET_BLOCK_TIME;
+  const ms = timestamps.map(toMillis).sort((a, b) => b - a);
+  const spanMs = ms[0] - ms[ms.length - 1];
+  const avgMs = spanMs / (ms.length - 1);
+  if (!isFinite(avgMs) || avgMs <= 0) return CHAIN_TARGET_BLOCK_TIME;
+  if (avgMs < 1000) return `${avgMs.toFixed(0)}ms`;
+  const s = avgMs / 1000;
+  return s < 10 ? `${s.toFixed(1)}s` : `${Math.round(s)}s`;
+}
+
+// DECISION: backend /chain/info has no total_transactions. Estimate cumulative tx count as
+// total_blocks × avg_tx_per_block from the polled window. Labelled "est." so users know.
+// TODO(api): add total_transactions to /chain/info — replace the estimate once shipped.
+function estimateTotalTransactions(
+  totalBlocks: number | undefined,
+  blocks: { transactions?: unknown[] }[] | null,
+): string {
+  if (!totalBlocks) return "—";
+  if (!blocks || blocks.length === 0) return formatNumber(totalBlocks);
+  const txs = blocks.reduce((n, b) => n + (b.transactions?.length ?? 0), 0);
+  const avg = txs / blocks.length;
+  if (avg <= 0) return "—";
+  return `${formatNumber(Math.round(totalBlocks * avg))} est.`;
 }
 
 export default function HomePage() {
@@ -105,7 +123,10 @@ export default function HomePage() {
   const { data: blocks, loading: blocksLoading } = useBlocks(network, 30);
   const { data: txs, loading: txsLoading } = useTransactions(network, 10);
 
-  const blockTime = blocks ? computeBlockTime(blocks.map((b) => b.timestamp)) : "~3s";
+  const blockTime = blocks ? computeBlockTime(blocks.map((b) => b.timestamp as unknown as number | string)) : CHAIN_TARGET_BLOCK_TIME;
+  const totalTxValue = stats?.total_transactions != null
+    ? formatNumber(stats.total_transactions)
+    : estimateTotalTransactions(stats?.total_blocks, blocks);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -158,13 +179,14 @@ export default function HomePage() {
         </form>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4">
+      {/* Stats grid — 2×5 */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 lg:gap-4">
         {statsLoading && !stats ? (
-          Array.from({ length: 8 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 10 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
             <StatCard label={t("stats.block_height")} value={stats ? formatNumber(stats.height) : "—"} loading={statsLoading} accent="var(--cyan)" />
+            <StatCard label={t("stats.total_transactions")} value={totalTxValue} loading={statsLoading && !blocks} accent="var(--blue)" />
             <StatCard label={t("stats.block_time")} value={blockTime} loading={false} accent="var(--gold)" />
             <StatCard label={t("stats.active_validators")} value={stats ? String(stats.active_validators) : "—"} loading={statsLoading} accent="var(--purple)" />
             <StatCard label={t("stats.mempool")} value={stats ? `${stats.mempool_size} tx` : "—"} loading={statsLoading} accent="var(--orange)" />
@@ -172,6 +194,7 @@ export default function HomePage() {
             <StatCard label={t("stats.total_burned")} value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "—"} loading={statsLoading} accent="var(--red)" />
             <StatCard label={t("stats.tokens_deployed")} value={stats ? String(stats.deployed_tokens) : "—"} loading={statsLoading} accent="var(--teal)" />
             <StatCard label={t("stats.block_reward")} value={stats ? `${stats.next_block_reward_srx} SRX` : "—"} loading={statsLoading} accent="var(--pink)" />
+            <StatCard label={t("stats.chain_id")} value={network === "mainnet" ? "7119" : "7120"} loading={false} accent="var(--lime)" />
           </>
         )}
       </div>
