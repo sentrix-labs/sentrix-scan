@@ -13,6 +13,7 @@ import { Timestamp } from "@/components/common/Timestamp";
 import { InfoRow } from "@/components/common/InfoRow";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useBlock } from "@/lib/hooks";
 
@@ -58,28 +59,24 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <Blocks className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Block Height</p>
-            <h1 className="text-2xl font-bold tracking-tight font-mono">#{block.index.toLocaleString()}</h1>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {blockHeight > 0 && (
-            <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
-              <ChevronLeft className="h-4 w-4" /> Prev
+      <PageHeader
+        icon={Blocks}
+        eyebrow="Block Height"
+        title={`#${block.index.toLocaleString()}`}
+        mono
+        actions={
+          <div className="flex gap-2">
+            {blockHeight > 0 && (
+              <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </Link>
+            )}
+            <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
+              Next <ChevronRight className="h-4 w-4" />
             </Link>
-          )}
-          <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
-            Next <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>

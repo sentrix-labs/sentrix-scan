@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Address } from "@/components/common/Address";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useValidators } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
@@ -89,17 +90,17 @@ export default function ValidatorsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-          <Users className="h-5 w-5 text-purple-500" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        {validators && (
-          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
-            {t("total", { count: validators.length })}
-          </span>
-        )}
-      </div>
+      <PageHeader
+        icon={Users}
+        title={t("title")}
+        actions={
+          validators ? (
+            <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+              {t("total", { count: validators.length })}
+            </span>
+          ) : null
+        }
+      />
 
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

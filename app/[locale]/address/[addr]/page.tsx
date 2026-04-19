@@ -10,6 +10,7 @@ import { TxHash } from "@/components/common/TxHash";
 import { Timestamp } from "@/components/common/Timestamp";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { useNetwork } from "@/lib/network-context";
 import { useAddress, useAddressHistory } from "@/lib/hooks";
@@ -33,16 +34,7 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Wallet className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Address</p>
-          <h1 className="text-2xl font-bold tracking-tight">Account</h1>
-        </div>
-      </div>
+      <PageHeader icon={Wallet} eyebrow="Address" title="Account" />
 
       {/* Address bar */}
       <div className="flex items-center gap-2 bg-muted/40 rounded-lg p-3 border border-border/60">

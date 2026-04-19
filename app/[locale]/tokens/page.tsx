@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useTokens } from "@/lib/hooks";
 import { formatNumber, shortenAddress } from "@/lib/format";
@@ -57,17 +58,17 @@ export default function TokensPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-          <Coins className="h-5 w-5 text-yellow-500" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        {tokens && (
-          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
-            {t("total", { count: tokens.length })}
-          </span>
-        )}
-      </div>
+      <PageHeader
+        icon={Coins}
+        title={t("title")}
+        actions={
+          tokens ? (
+            <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+              {t("total", { count: tokens.length })}
+            </span>
+          ) : null
+        }
+      />
 
       <Card>
         <CardHeader className="pb-3">

@@ -13,6 +13,7 @@ import { Copyable } from "@/components/common/Copyable";
 import { useNetwork } from "@/lib/network-context";
 import { fetchToken, type TokenData } from "@/lib/api";
 import { useTokenHolders, useTokenTrades } from "@/lib/hooks";
+import { PageHeader } from "@/components/common/PageHeader";
 import { formatNumber } from "@/lib/format";
 
 export default function TokenDetailPage({ params }: { params: Promise<{ addr: string }> }) {
@@ -53,22 +54,21 @@ export default function TokenDetailPage({ params }: { params: Promise<{ addr: st
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-d)] flex items-center justify-center text-white font-semibold shrink-0">
-          {token.symbol.slice(0, 2).toUpperCase()}
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
+      <PageHeader
+        iconSlot={
+          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-d)] flex items-center justify-center text-[var(--bk)] font-semibold">
+            {token.symbol.slice(0, 2).toUpperCase()}
+          </div>
+        }
+        eyebrow={<Address address={token.contract_address} muted className="text-[10px]" />}
+        title={
+          <span className="flex items-center gap-2">
             {token.name}
             <span className="text-base text-muted-foreground font-normal">({token.symbol})</span>
-          </h1>
-          <div className="flex items-center gap-1 text-xs mt-0.5">
-            <Address address={token.contract_address} muted className="text-xs" />
-          </div>
-        </div>
-      </div>
+          </span>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Trophy } from "lucide-react";
 import { CategoryNav } from "@/components/leaderboard/CategoryNav";
+import { PageHeader } from "@/components/common/PageHeader";
 
 export const metadata: Metadata = {
   title: "Leaderboard",
@@ -12,17 +13,9 @@ export const metadata: Metadata = {
 export default function LeaderboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap mb-6">
-        <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-          <Trophy className="h-5 w-5 text-amber-500" />
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Rankings</p>
-          <h1 className="text-2xl font-bold tracking-tight">Leaderboard</h1>
-        </div>
-      </div>
+      <PageHeader icon={Trophy} eyebrow="Rankings" title="Leaderboard" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6 mt-6">
         {/* Sidebar (lg+) */}
         <aside className="hidden lg:block">
           <div className="sticky top-20">

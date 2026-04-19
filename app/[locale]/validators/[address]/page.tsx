@@ -12,6 +12,7 @@ import { BlockHeight } from "@/components/common/BlockHeight";
 import { Timestamp } from "@/components/common/Timestamp";
 import { InfoRow } from "@/components/common/InfoRow";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useValidators, useBlocks } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
@@ -89,19 +90,17 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-          <Users className="h-5 w-5 text-purple-500" />
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wider">Validator</p>
-          <h1 className="text-2xl font-bold tracking-tight">{validator.name || "Unnamed"}</h1>
-        </div>
-        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.color}`}>
-          {st.icon}
-          {st.text}
-        </span>
-      </div>
+      <PageHeader
+        icon={Users}
+        eyebrow="Validator"
+        title={validator.name || "Unnamed"}
+        actions={
+          <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${st.color}`}>
+            {st.icon}
+            {st.text}
+          </span>
+        }
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card><CardContent className="p-4">

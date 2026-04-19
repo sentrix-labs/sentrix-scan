@@ -10,6 +10,7 @@ import { BlockHeight } from "@/components/common/BlockHeight";
 import { Timestamp } from "@/components/common/Timestamp";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useBlocks } from "@/lib/hooks";
 import { shortenHash } from "@/lib/format";
@@ -34,17 +35,18 @@ export default function BlocksPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Blocks className="h-5 w-5 text-primary" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        {blocks && (
-          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
-            {t("most_recent", { count: blocks.length })}
-          </span>
-        )}
-      </div>
+      <PageHeader
+        icon={Blocks}
+        title={t("title")}
+        actions={
+          blocks ? (
+            <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+              {t("most_recent", { count: blocks.length })}
+            </span>
+          ) : null
+        }
+      />
+
 
       <Card>
         <CardHeader className="pb-3">
