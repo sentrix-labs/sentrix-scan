@@ -12,6 +12,7 @@ import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
+import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { useNetwork } from "@/lib/network-context";
 import { useAddress, useAddressHistory } from "@/lib/hooks";
@@ -155,9 +156,11 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
                   </div>
                 </>
               ) : (
-                <div className="p-8 text-center text-sm text-muted-foreground">
-                  No transactions found for this address.
-                </div>
+                <EmptyState
+                  icon={ArrowDown}
+                  title="No transactions for this address"
+                  hint="Inbound and outbound transfers will appear here once recorded on chain."
+                />
               )}
             </CardContent>
           </Card>
@@ -165,10 +168,13 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
 
         <TabsContent value="tokens">
           <Card>
-            <CardContent className="p-8 text-center">
+            <CardContent className="p-0">
               {/* TODO(api): needs GET /accounts/{address}/tokens — using placeholder */}
-              <p className="text-sm text-muted-foreground">No SRC-20 token holdings found.</p>
-              <p className="text-xs text-muted-foreground mt-2">Token balance tracking is being wired up on the backend.</p>
+              <EmptyState
+                icon={ArrowLeftRight}
+                title="No SRC-20 token holdings found"
+                hint="Token balance tracking is being wired up on the backend."
+              />
             </CardContent>
           </Card>
         </TabsContent>

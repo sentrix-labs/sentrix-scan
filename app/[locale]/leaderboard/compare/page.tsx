@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { GitCompare, ArrowLeftRight } from "lucide-react";
+import { EmptyState } from "@/components/common/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,12 @@ const TYPE_LABELS: Record<CompareType, string> = {
   address:   "Address",
   validator: "Validator",
   token:     "Token",
+};
+
+const PLURALS: Record<CompareType, string> = {
+  address:   "addresses",
+  validator: "validators",
+  token:     "tokens",
 };
 
 export default function ComparePage() {
@@ -111,9 +118,12 @@ function CompareInner() {
         : <TokenCompare network={network} a={a} b={b} />
       ) : (
         <Card>
-          <CardContent className="p-12 text-center">
-            <GitCompare className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">Enter two {TYPE_LABELS[type].toLowerCase()}es to compare</p>
+          <CardContent className="p-0">
+            <EmptyState
+              icon={GitCompare}
+              title={`Enter two ${PLURALS[type]} to compare`}
+              hint="Paste a 0x... value into each field and hit Compare."
+            />
           </CardContent>
         </Card>
       )}

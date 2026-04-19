@@ -14,6 +14,7 @@ import { InfoRow } from "@/components/common/InfoRow";
 import { Pagination } from "@/components/common/Pagination";
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useNetwork } from "@/lib/network-context";
 import { useValidators, useBlocks } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
@@ -214,22 +215,26 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
 
         <TabsContent value="delegators">
           <Card>
-            <CardContent className="p-8 text-center">
-              {/* TODO(api): needs GET /validators/{address}/delegators — using placeholder */}
-              <p className="text-sm text-muted-foreground">Delegator list is not yet available.</p>
-              <p className="text-xs text-muted-foreground mt-2">Endpoint pending on the Sentrix Chain API.</p>
+            <CardContent className="p-0">
+              {/* TODO(api): needs GET /validators/{address}/delegators */}
+              <EmptyState
+                icon={Users}
+                title="Delegator list not yet available"
+                hint="Endpoint /validators/{address}/delegators pending on the Sentrix Chain API."
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="rewards">
           <Card>
-            <CardContent className="p-8 text-center">
-              {/* TODO(api): needs GET /validators/{address}/rewards — using placeholder */}
-              <p className="text-sm text-muted-foreground">Rewards history is not yet available.</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Total earned: <span className="font-mono">{validator.rewards_earned !== undefined ? `${formatNumber(validator.rewards_earned)} SRX` : "-"}</span>
-              </p>
+            <CardContent className="p-0">
+              {/* TODO(api): needs GET /validators/{address}/rewards */}
+              <EmptyState
+                icon={Users}
+                title="Rewards history not yet available"
+                hint={`Total earned: ${validator.rewards_earned !== undefined ? `${formatNumber(validator.rewards_earned)} SRX` : "—"}`}
+              />
             </CardContent>
           </Card>
         </TabsContent>

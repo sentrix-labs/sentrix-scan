@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Address } from "@/components/common/Address";
 import { TxHash } from "@/components/common/TxHash";
 import { Timestamp } from "@/components/common/Timestamp";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useNetwork } from "@/lib/network-context";
 import { useBlocks } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
@@ -68,11 +69,11 @@ export default function WhaleRecentPage() {
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" style={{ opacity: 1 - i * 0.1 }} />)}
           </div>
         ) : large.length === 0 ? (
-          <div className="p-12 text-center">
-            <Fish className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No whale-sized transactions in the last 100 blocks</p>
-            <p className="text-xs text-muted-foreground/80 mt-1">Try a lower threshold.</p>
-          </div>
+          <EmptyState
+            icon={Fish}
+            title="No whale-sized transactions in the last 100 blocks"
+            hint="Try a lower threshold."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
