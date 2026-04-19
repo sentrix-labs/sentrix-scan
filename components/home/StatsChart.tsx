@@ -60,6 +60,15 @@ function formatAgo(ms: number): string {
   return `${h.toFixed(1)}h`;
 }
 
+function formatAge(seconds: number): string {
+  if (seconds < 60) return `${Math.max(1, Math.round(seconds))}s ago`;
+  const m = seconds / 60;
+  if (m < 60) return `${Math.round(m)}m ago`;
+  const h = m / 60;
+  if (h < 24) return `${h.toFixed(1)}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+}
+
 export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
   const [range, setRange] = useState<Range>("5m");
   const data = useMemo(() => buildSeries(blocks, range), [blocks, range]);
@@ -70,6 +79,16 @@ export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
     return sum / data.length;
   }, [data]);
   const hasSignal = data.some((d) => d.tps > 0);
+
+  // Idle detection: when the most recent block is older than the selected window, the chain
+  // either paused or we fetched stale state. Tell the user that directly instead of a
+  // generic "no throughput".
+  const lastBlockAgeSec = useMemo(() => {
+    if (!blocks || blocks.length === 0) return null;
+    const newest = blocks.reduce((m, b) => Math.max(m, toMillis(b.timestamp)), 0);
+    return Math.floor((Date.now() - newest) / 1000);
+  }, [blocks]);
+  const isIdle = lastBlockAgeSec !== null && lastBlockAgeSec * 1000 > RANGE_MS[range];
 
   return (
     <Card>
@@ -104,10 +123,21 @@ export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
         {!hasSignal ? (
           <div className="h-48 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-[var(--brd)] rounded-lg bg-[color-mix(in_oklab,var(--muted)_30%,transparent)]">
             <Activity className="h-6 w-6 text-muted-foreground/40" />
-            <p className="text-sm text-muted-foreground">No throughput in the last {range}</p>
-            <p className="text-xs text-muted-foreground/70 font-mono">
-              Chart populates once the polled block window falls inside the selected range.
-            </p>
+            {isIdle && lastBlockAgeSec !== null ? (
+              <>
+                <p className="text-sm text-[var(--orange)] font-medium">Chain appears idle</p>
+                <p className="text-xs text-muted-foreground font-mono">
+                  Last block {formatAge(lastBlockAgeSec)} · longer than the selected {range} window
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">No throughput in the last {range}</p>
+                <p className="text-xs text-muted-foreground/70 font-mono">
+                  Chart populates once the polled block window falls inside the selected range.
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <div className="h-48">
