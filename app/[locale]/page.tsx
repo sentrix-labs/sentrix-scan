@@ -98,30 +98,41 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12 space-y-10 animate-fade-in">
       {/* Hero search */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">
-          {t("title_prefix")} <span className="text-blue-500">{t("title_suffix")}</span>
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t("description")}
-          <span className="inline-flex items-center gap-1.5 ml-2 text-xs px-2 py-0.5 rounded-full bg-muted">
-            <span className={`w-1.5 h-1.5 rounded-full ${network === "mainnet" ? "bg-green-500" : "bg-orange-500"}`} />
-            {network === "mainnet" ? "Chain ID 7119" : "Chain ID 7120"}
+      <div className="text-center space-y-5 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/60 border border-border text-xs text-muted-foreground">
+          <span className={`w-1.5 h-1.5 rounded-full ${network === "mainnet" ? "bg-green-500" : "bg-orange-500"} animate-pulse`} />
+          <span className="font-mono">{network === "mainnet" ? "Chain ID 7119" : "Chain ID 7120"}</span>
+          <span className="text-muted-foreground/60">·</span>
+          <span className="capitalize">{network}</span>
+        </div>
+        <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
+          {t("title_prefix")}{" "}
+          <span className="bg-gradient-to-r from-blue-500 via-blue-500 to-purple-500 bg-clip-text text-transparent">
+            {t("title_suffix")}
           </span>
+        </h1>
+        <p className="text-muted-foreground text-base">
+          {t("description")}
         </p>
 
-        <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t("search_placeholder")}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-12 pl-12 pr-4 text-sm bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all shadow-sm"
-            />
+        <form onSubmit={handleSearch} className="max-w-2xl mx-auto pt-2">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-purple-500/0 rounded-xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder={t("search_placeholder")}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full h-14 pl-12 pr-24 text-base bg-card border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all shadow-sm"
+              />
+              <kbd className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-mono text-muted-foreground bg-muted border border-border rounded px-1.5 py-0.5">
+                ⌘K
+              </kbd>
+            </div>
           </div>
         </form>
       </div>
