@@ -7,58 +7,89 @@ import { TrendingUp, Activity } from "lucide-react";
 import type { BlockData } from "@/lib/api";
 import { toMillis } from "@/lib/format";
 
-type Range = "1h" | "6h" | "24h";
+type Range = "1m" | "5m" | "15m" | "1h";
 
-// DECISION: no backend /chain/performance endpoint yet; derive block-rate series from the recent
-// blocks window we already poll. Bucketed by minute, extended to the selected range.
-// TODO(api): needs GET /chain/performance?range=1h|6h|24h — currently computed client-side.
+const RANGE_MS: Record<Range, number> = {
+  "1m":  60_000,
+  "5m":  5 * 60_000,
+  "15m": 15 * 60_000,
+  "1h":  60 * 60_000,
+};
+
+const BUCKET_COUNT = 30;
+
+// DECISION: no /chain/performance endpoint. We derive TPS from the block window the explorer
+// already polls. Each block carries `tx_count` (coinbase = 1, plus any user tx). Bucket the
+// span into BUCKET_COUNT slices of equal duration over the selected window and emit
+// `tx_in_bucket / bucket_seconds` as the TPS point.
+// TODO(api): needs GET /chain/performance?range=1m|5m|15m|1h — this is a fallback.
 function buildSeries(blocks: BlockData[] | null, range: Range): { t: string; tps: number }[] {
-  if (!blocks || blocks.length < 2) return [];
-  const windowMs = { "1h": 60 * 60 * 1000, "6h": 6 * 60 * 60 * 1000, "24h": 24 * 60 * 60 * 1000 }[range];
+  const windowMs = RANGE_MS[range];
+  const bucketMs = windowMs / BUCKET_COUNT;
+  const bucketSec = bucketMs / 1000;
   const now = Date.now();
-  const bucketMs = windowMs / 30;
-  const series: Record<number, number> = {};
+  const series = new Array<number>(BUCKET_COUNT).fill(0);
 
-  blocks.forEach((b) => {
-    const ts = toMillis(b.timestamp);
-    if (now - ts > windowMs) return;
-    const bucket = Math.floor((now - ts) / bucketMs);
-    // DECISION: list endpoint only sends tx_count (not the transactions array); prefer it
-    // when present. Includes coinbase tx per block — matches Solscan's "TPS" convention.
-    const txCount = b.tx_count ?? b.transactions?.length ?? 0;
-    series[bucket] = (series[bucket] || 0) + txCount;
-  });
+  if (blocks) {
+    for (const b of blocks) {
+      const ts = toMillis(b.timestamp);
+      const ageMs = now - ts;
+      if (ageMs < 0 || ageMs > windowMs) continue;
+      const bucket = Math.min(BUCKET_COUNT - 1, Math.floor(ageMs / bucketMs));
+      const txCount = b.tx_count ?? b.transactions?.length ?? 0;
+      series[bucket] += txCount;
+    }
+  }
 
+  // Label each bucket by its center time — "5m ago", "now", etc.
   const out: { t: string; tps: number }[] = [];
-  for (let i = 29; i >= 0; i--) {
-    const ms = i * bucketMs;
-    const minutesAgo = Math.round(ms / 60_000);
-    const label = minutesAgo === 0 ? "now" : `${minutesAgo}m`;
-    out.push({ t: label, tps: (series[i] ?? 0) / (bucketMs / 1000) });
+  for (let i = BUCKET_COUNT - 1; i >= 0; i--) {
+    const centerAgoMs = (i + 0.5) * bucketMs;
+    const label = formatAgo(centerAgoMs);
+    out.push({ t: label, tps: series[i] / bucketSec });
   }
   return out;
 }
 
+function formatAgo(ms: number): string {
+  const s = ms / 1000;
+  if (s < 60) return s < 2 ? "now" : `${Math.round(s)}s`;
+  const m = s / 60;
+  if (m < 60) return `${Math.round(m)}m`;
+  const h = m / 60;
+  return `${h.toFixed(1)}h`;
+}
+
 export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
-  const [range, setRange] = useState<Range>("1h");
+  const [range, setRange] = useState<Range>("5m");
   const data = useMemo(() => buildSeries(blocks, range), [blocks, range]);
   const peak = useMemo(() => (data.length ? Math.max(...data.map((d) => d.tps)) : 0), [data]);
+  const avg = useMemo(() => {
+    if (!data.length) return 0;
+    const sum = data.reduce((s, d) => s + d.tps, 0);
+    return sum / data.length;
+  }, [data]);
   const hasSignal = data.some((d) => d.tps > 0);
 
   return (
     <Card>
       <CardHeader className="pb-3 flex flex-row items-center justify-between gap-3 flex-wrap">
-        <CardTitle className="text-base flex items-center gap-2">
+        <CardTitle className="flex items-center gap-3">
           <TrendingUp className="h-4 w-4 text-[var(--gold)]" />
-          <span className="font-mono text-[10px] tracking-[.22em] uppercase text-[var(--tx-d)]">Transactions Per Second</span>
-          <span className="text-xs text-muted-foreground font-normal ml-2 font-mono">peak {peak.toFixed(2)} tps</span>
+          <span className="font-mono text-[10px] tracking-[.22em] uppercase text-[var(--tx-d)]">
+            Transactions Per Second
+          </span>
+          <span className="hidden sm:inline text-[11px] text-muted-foreground font-mono">
+            peak <span className="text-[var(--gold)]">{peak.toFixed(2)}</span> · avg{" "}
+            <span className="text-[var(--tx-m)]">{avg.toFixed(2)}</span>
+          </span>
         </CardTitle>
         <div className="flex items-center gap-1">
-          {(["1h", "6h", "24h"] as const).map((r) => (
+          {(["1m", "5m", "15m", "1h"] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
+              className={`text-[10px] px-2.5 py-1 rounded-md border transition-colors uppercase tracking-[.1em] ${
                 range === r
                   ? "bg-primary/10 text-primary border-primary/30"
                   : "border-border text-muted-foreground hover:bg-accent"
@@ -74,7 +105,9 @@ export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
           <div className="h-48 flex flex-col items-center justify-center text-center gap-2 border border-dashed border-[var(--brd)] rounded-lg bg-[color-mix(in_oklab,var(--muted)_30%,transparent)]">
             <Activity className="h-6 w-6 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">No throughput in the last {range}</p>
-            <p className="text-xs text-muted-foreground/70 font-mono">Chart populates after the first transaction in-window.</p>
+            <p className="text-xs text-muted-foreground/70 font-mono">
+              Chart populates once the polled block window falls inside the selected range.
+            </p>
           </div>
         ) : (
           <div className="h-48">

@@ -65,7 +65,9 @@ export default function HomePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const { data: stats, loading: statsLoading } = useStats(network);
-  const { data: blocks, loading: blocksLoading } = useBlocks(network, 30);
+  // DECISION: TPS chart + Latest Blocks both consume this window. 500 is enough to fill the
+  // 1m/5m/15m buckets at 0.5s block time; Latest Blocks only shows the top 10 of the list.
+  const { data: blocks, loading: blocksLoading } = useBlocks(network, 500);
   const { data: txs, loading: txsLoading } = useTransactions(network, 10);
 
   const blockTime = blocks ? computeBlockTime(blocks.map((b) => b.timestamp as unknown as number | string)) : CHAIN_TARGET_BLOCK_TIME;
