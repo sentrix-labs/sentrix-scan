@@ -5,6 +5,7 @@ import { Fish } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Address } from "@/components/common/Address";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useNetwork } from "@/lib/network-context";
 import { useRichlist, useValidators } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
@@ -58,11 +59,11 @@ export default function WhaleTopWalletsPage() {
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" style={{ opacity: 1 - i * 0.1 }} />)}
           </div>
         ) : whales.length === 0 ? (
-          <div className="p-12 text-center">
-            <Fish className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No wallets above this threshold</p>
-            <p className="text-xs text-muted-foreground/80 mt-1">Try a lower minimum balance.</p>
-          </div>
+          <EmptyState
+            icon={Fish}
+            title="No wallets above this threshold"
+            hint="Try a lower minimum balance."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

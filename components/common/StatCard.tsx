@@ -27,7 +27,7 @@ export function StatCard({ label, value, loading = false, accent = "var(--gold)"
   const { num, unit } = splitValue(value);
 
   return (
-    <div className="group relative overflow-hidden bg-[color-mix(in_oklab,var(--card)_60%,transparent)] hover:bg-[var(--card)] border border-[var(--brd)] hover:border-[color-mix(in_oklab,var(--gold)_20%,var(--brd))] rounded-2xl px-4 py-5 md:px-5 md:py-6 transition-all duration-500 min-w-0">
+    <div className="card-lift group relative overflow-hidden bg-[color-mix(in_oklab,var(--card)_60%,transparent)] hover:bg-[var(--card)] border border-[var(--brd)] rounded-2xl px-4 py-5 md:px-5 md:py-6 min-w-0">
       {/* Animated corner lines */}
       <span
         className="absolute top-0 left-0 h-px w-0 group-hover:w-[60px] transition-all duration-500 opacity-0 group-hover:opacity-70"

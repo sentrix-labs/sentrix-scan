@@ -255,6 +255,47 @@ tbody.row-hover > tr:hover {
 }
 .font-serif { font-family: 'Playfair Display', serif; }
 
+/* ===== Branded skeleton shimmer — replaces shadcn's grey pulse ===== */
+@keyframes shimmer {
+  0% { background-position: -150% 0; }
+  100% { background-position: 250% 0; }
+}
+.shimmer {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--gold) 8%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 150% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* ===== Brand focus ring — gold halo on keyboard focus across the app ===== */
+*:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[role="button"]:focus-visible,
+[role="radio"]:focus-visible {
+  outline-color: var(--gold);
+}
+
+/* Card hover lift — subtle y-axis translate for interactive cards */
+.card-lift {
+  transition: transform 200ms cubic-bezier(.25,1,.5,1), border-color 200ms ease, box-shadow 200ms ease;
+}
+.card-lift:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--gold) 22%, var(--brd));
+  box-shadow: 0 8px 24px -16px color-mix(in oklab, var(--gold) 40%, transparent);
+}
+
 /* ===== Card corner-line hover (landing-style) ===== */
 .corner-lines {
   position: relative;

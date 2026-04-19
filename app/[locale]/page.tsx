@@ -14,6 +14,7 @@ import { TxHash } from "@/components/common/TxHash";
 import { BlockHeight } from "@/components/common/BlockHeight";
 import { Timestamp } from "@/components/common/Timestamp";
 import { StatCard } from "@/components/common/StatCard";
+import { LiveTicker } from "@/components/home/LiveTicker";
 import { useNetwork } from "@/lib/network-context";
 
 // DECISION: lazy-load StatsChart to keep Home bundle below the 500 kB gzipped target.
@@ -88,7 +89,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-6 py-10 lg:py-16 space-y-12 animate-fade-in">
+    <>
+      <LiveTicker stats={stats} blockTime={blockTime} network={network} />
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-10 lg:py-16 space-y-12 animate-fade-in">
       {/* Editorial hero */}
       <div className="text-center space-y-6 max-w-3xl mx-auto">
         <div className="flex items-center justify-center gap-3 anim-hero-1 opacity-0">
@@ -256,6 +259,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
