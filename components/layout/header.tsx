@@ -22,7 +22,7 @@ export function Header() {
   const t = useTranslations("nav");
   const locale = useLocale();
   const pathname = usePathname();
-  const { network, toggle } = useNetwork();
+  const { network, setNetwork } = useNetwork();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -218,17 +218,39 @@ export function Header() {
             )}
           </div>
 
-          {/* Network */}
-          <button
-            onClick={toggle}
-            className="inline-flex items-center gap-1.5 h-8 px-3 text-[10px] tracking-[.1em] uppercase font-light rounded-full border border-[var(--brd)] text-[var(--tx-m)] hover:text-[var(--gold)] hover:border-[var(--brd2)] transition-colors"
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${network === "mainnet" ? "bg-[var(--green)]" : "bg-[var(--orange)]"} animate-pulse-live`} />
-            <span className="hidden sm:inline">{network === "mainnet" ? "Mainnet" : "Testnet"}</span>
-            <span className="hidden lg:inline text-[9px] font-mono text-[var(--tx-d)]">
-              {network === "mainnet" ? "7119" : "7120"}
-            </span>
-          </button>
+          {/* Network — segmented control so both options are always visible */}
+          <div className="inline-flex items-center h-8 p-0.5 rounded-full border border-[var(--brd)] bg-[color-mix(in_oklab,var(--foreground)_3%,transparent)]" role="radiogroup" aria-label="Network">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={network === "mainnet"}
+              onClick={() => network !== "mainnet" && setNetwork("mainnet")}
+              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[10px] tracking-[.1em] uppercase font-light transition-colors ${
+                network === "mainnet"
+                  ? "bg-[color-mix(in_oklab,var(--gold)_12%,transparent)] text-[var(--gold)]"
+                  : "text-[var(--tx-d)] hover:text-[var(--tx-m)]"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full bg-[var(--green)] ${network === "mainnet" ? "animate-pulse-live" : ""}`} />
+              <span className="hidden sm:inline">Main</span>
+              <span className="hidden lg:inline text-[9px] font-mono text-[var(--tx-d)]">7119</span>
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={network === "testnet"}
+              onClick={() => network !== "testnet" && setNetwork("testnet")}
+              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[10px] tracking-[.1em] uppercase font-light transition-colors ${
+                network === "testnet"
+                  ? "bg-[color-mix(in_oklab,var(--orange)_14%,transparent)] text-[var(--orange)]"
+                  : "text-[var(--tx-d)] hover:text-[var(--tx-m)]"
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full bg-[var(--orange)] ${network === "testnet" ? "animate-pulse-live" : ""}`} />
+              <span className="hidden sm:inline">Test</span>
+              <span className="hidden lg:inline text-[9px] font-mono text-[var(--tx-d)]">7120</span>
+            </button>
+          </div>
 
           {/* Theme */}
           <button
