@@ -4,7 +4,24 @@
     "blocks": "Blocks",
     "validators": "Validators",
     "tokens": "Tokens",
+    "leaderboard": "Leaderboard",
     "search_placeholder": "Search by block / tx / address..."
+  },
+  "leaderboard": {
+    "eyebrow": "Accounts",
+    "title": "Top Holders",
+    "subtitle": "Largest accounts on Sentrix Chain ranked by SRX balance",
+    "tab_holders": "Top Holders",
+    "tab_active": "Most Active",
+    "rank": "Rank",
+    "account": "Account",
+    "balance": "Balance",
+    "share": "% of Supply",
+    "txs": "Txs",
+    "mock_notice": "Showing illustrative data. A live ranking endpoint is being wired up on the backend; until then, validator balances are real while other rows are placeholders.",
+    "partial_notice": "Real balances are shown for known validators; remaining rows are illustrative placeholders until /accounts/top ships.",
+    "active_soon": "Most active accounts is coming soon.",
+    "active_soon_hint": "Endpoint /accounts/top?sort=tx_count pending on the Sentrix Chain API."
   },
   "home": {
     "title_prefix": "Sentrix",

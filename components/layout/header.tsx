@@ -68,11 +68,12 @@ export function Header() {
     setLangOpen(false);
   }
 
-  const NAV_LINKS: { href: "/blocks" | "/validators" | "/tokens" | "/"; key: keyof IntlMessages["nav"] }[] = [
+  const NAV_LINKS: { href: "/blocks" | "/validators" | "/tokens" | "/leaderboard" | "/"; key: keyof IntlMessages["nav"] }[] = [
     { href: "/", key: "home" },
     { href: "/blocks", key: "blocks" },
     { href: "/validators", key: "validators" },
     { href: "/tokens", key: "tokens" },
+    { href: "/leaderboard", key: "leaderboard" },
   ];
 
   return (

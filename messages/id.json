@@ -4,7 +4,24 @@
     "blocks": "Blok",
     "validators": "Validator",
     "tokens": "Token",
+    "leaderboard": "Leaderboard",
     "search_placeholder": "Cari berdasarkan blok / tx / alamat..."
+  },
+  "leaderboard": {
+    "eyebrow": "Akun",
+    "title": "Pemegang Teratas",
+    "subtitle": "Akun terbesar di Sentrix Chain, diurutkan berdasarkan saldo SRX",
+    "tab_holders": "Pemegang Teratas",
+    "tab_active": "Paling Aktif",
+    "rank": "Peringkat",
+    "account": "Akun",
+    "balance": "Saldo",
+    "share": "% Pasokan",
+    "txs": "Tx",
+    "mock_notice": "Menampilkan data ilustrasi. Endpoint ranking live sedang dipasang di backend; untuk sementara saldo validator asli, baris lain placeholder.",
+    "partial_notice": "Saldo asli ditampilkan untuk validator yang dikenal; baris lain placeholder sampai /accounts/top tersedia.",
+    "active_soon": "Akun paling aktif segera hadir.",
+    "active_soon_hint": "Endpoint /accounts/top?sort=tx_count menunggu di API Sentrix Chain."
   },
   "home": {
     "title_prefix": "Sentrix",
