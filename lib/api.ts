@@ -25,6 +25,8 @@ export interface ChainInfo {
   active_validators: number;
   deployed_tokens: number;
   next_block_reward_srx: number;
+  // TODO(api): needs /chain/stats to return cumulative tx count. Optional until backend ships.
+  total_transactions?: number;
 }
 
 export interface BlockData {

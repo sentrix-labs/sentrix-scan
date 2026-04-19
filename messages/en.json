@@ -34,10 +34,12 @@
       "block_time": "Block Time",
       "active_validators": "Active Validators",
       "mempool": "Mempool",
+      "total_transactions": "Total Transactions",
       "total_minted": "Total Minted",
       "total_burned": "Total Burned",
       "tokens_deployed": "Tokens Deployed",
-      "block_reward": "Block Reward"
+      "block_reward": "Block Reward",
+      "chain_id": "Chain ID"
     },
     "latest_blocks": "Latest Blocks",
     "latest_transactions": "Latest Transactions",
@@ -50,7 +52,8 @@
     "most_recent": "{count} most recent",
     "subtitle_mainnet": "Latest blocks on Mainnet (Chain ID 7119)",
     "subtitle_testnet": "Latest blocks on Testnet (Chain ID 7120)",
-    "block": "Block",
+    "block": "Block Height",
+    "block_hint": "The block's position in the chain (a.k.a. `index` in the raw API).",
     "age": "Age",
     "txs": "Txs",
     "hash": "Hash",
@@ -177,8 +180,9 @@
     "error_id": "Error ID: {id}"
   },
   "not_found_page": {
-    "title": "404 — Not Found",
-    "description": "The page you requested could not be found. It may have been moved or does not exist.",
+    "eyebrow": "Not Found",
+    "title": "This chain has no such block.",
+    "description": "The page you requested could not be found. It may have been moved, or the address / hash you typed is incomplete.",
     "browse_blocks": "Browse blocks"
   },
   "footer": {

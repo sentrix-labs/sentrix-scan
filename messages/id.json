@@ -34,10 +34,12 @@
       "block_time": "Waktu Blok",
       "active_validators": "Validator Aktif",
       "mempool": "Mempool",
+      "total_transactions": "Total Transaksi",
       "total_minted": "Total Dicetak",
       "total_burned": "Total Dibakar",
       "tokens_deployed": "Token Tersebar",
-      "block_reward": "Reward Blok"
+      "block_reward": "Reward Blok",
+      "chain_id": "Chain ID"
     },
     "latest_blocks": "Blok Terbaru",
     "latest_transactions": "Transaksi Terbaru",
@@ -50,7 +52,8 @@
     "most_recent": "{count} terbaru",
     "subtitle_mainnet": "Blok terbaru di Mainnet (Chain ID 7119)",
     "subtitle_testnet": "Blok terbaru di Testnet (Chain ID 7120)",
-    "block": "Blok",
+    "block": "Tinggi Blok",
+    "block_hint": "Posisi blok pada chain (di API disebut `index`).",
     "age": "Usia",
     "txs": "Tx",
     "hash": "Hash",
@@ -177,8 +180,9 @@
     "error_id": "ID Error: {id}"
   },
   "not_found_page": {
-    "title": "404 — Tidak Ditemukan",
-    "description": "Halaman yang Anda minta tidak ditemukan. Mungkin telah dipindah atau tidak ada.",
+    "eyebrow": "Tidak Ditemukan",
+    "title": "Chain ini tidak mengenal blok tersebut.",
+    "description": "Halaman yang Anda minta tidak ditemukan. Mungkin dipindahkan, atau alamat / hash yang diketik belum lengkap.",
     "browse_blocks": "Lihat blok"
   },
   "footer": {

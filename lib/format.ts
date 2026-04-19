@@ -6,8 +6,12 @@ export function formatNumber(n: number): string {
 }
 
 export function formatSRX(amount: number): string {
+  if (amount >= 1_000_000_000) return (amount / 1_000_000_000).toFixed(2) + "B SRX";
   if (amount >= 1_000_000) return (amount / 1_000_000).toFixed(2) + "M SRX";
   if (amount >= 1_000) return (amount / 1_000).toFixed(2) + "K SRX";
+  // DECISION: keep 2 decimals for sub-1K amounts so stat cards don't overflow ("600.0119 SRX"
+  // wrapped on the 2×5 grid). Sub-1 amounts keep 4 decimals — small-coin precision matters.
+  if (amount >= 1) return amount.toFixed(2) + " SRX";
   return amount.toFixed(4) + " SRX";
 }
 
@@ -23,7 +27,7 @@ export function shortenAddress(address: string): string {
 
 // DECISION: API returns unix seconds (10 digits, e.g. 1776597784). JS Date expects ms.
 // Any numeric timestamp below 1e12 is treated as seconds and scaled up.
-function toMillis(timestamp: string | number): number {
+export function toMillis(timestamp: string | number): number {
   if (typeof timestamp === "string") {
     const n = Number(timestamp);
     if (Number.isFinite(n)) return n < 1e12 ? n * 1000 : n;

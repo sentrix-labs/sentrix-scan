@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useTokens } from "@/lib/hooks";
 import { formatNumber, shortenAddress } from "@/lib/format";
@@ -57,17 +58,17 @@ export default function TokensPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-          <Coins className="h-5 w-5 text-yellow-500" />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        {tokens && (
-          <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
-            {t("total", { count: tokens.length })}
-          </span>
-        )}
-      </div>
+      <PageHeader
+        icon={Coins}
+        title={t("title")}
+        actions={
+          tokens ? (
+            <span className="text-xs px-2 py-1 rounded-md bg-muted/60 border border-border text-muted-foreground font-mono">
+              {t("total", { count: tokens.length })}
+            </span>
+          ) : null
+        }
+      />
 
       <Card>
         <CardHeader className="pb-3">
@@ -101,18 +102,18 @@ export default function TokensPage() {
                         <td className="px-4 py-2.5 text-muted-foreground">{(page - 1) * PAGE_SIZE + i + 1}</td>
                         <td className="px-4 py-2.5">
                           <Link href={`/tokens/${token.contract_address}`} className="inline-flex items-center gap-1">
-                            <span className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+                            <span className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-d)] flex items-center justify-center text-white text-xs font-semibold shrink-0">
                               {token.symbol.slice(0, 2).toUpperCase()}
                             </span>
                             <span className="flex flex-col">
-                              <span className="font-medium text-sm text-blue-500 hover:underline">{token.name}</span>
+                              <span className="font-medium text-sm text-primary hover:underline">{token.name}</span>
                               <span className="text-muted-foreground text-xs">{token.symbol}</span>
                             </span>
                           </Link>
                         </td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1">
-                            <Link href={`/tokens/${token.contract_address}`} className="font-mono text-xs text-blue-500 hover:underline">
+                            <Link href={`/tokens/${token.contract_address}`} className="font-mono text-xs text-primary hover:underline">
                               {shortenAddress(token.contract_address)}
                             </Link>
                             <Copyable text={token.contract_address} bare />

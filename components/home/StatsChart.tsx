@@ -45,7 +45,7 @@ export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
     <Card>
       <CardHeader className="pb-3 flex flex-row items-center justify-between gap-3 flex-wrap">
         <CardTitle className="text-base flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-blue-500" />
+          <TrendingUp className="h-4 w-4 text-primary" />
           Transactions Per Second
           <span className="text-xs text-muted-foreground font-normal ml-2 font-mono">peak {peak.toFixed(2)} tps</span>
         </CardTitle>
@@ -56,7 +56,7 @@ export function StatsChart({ blocks }: { blocks: BlockData[] | null }) {
               onClick={() => setRange(r)}
               className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
                 range === r
-                  ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                  ? "bg-primary/10 text-primary border-primary/30"
                   : "border-border text-muted-foreground hover:bg-accent"
               }`}
             >

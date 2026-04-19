@@ -10,7 +10,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/blocks", changeFrequency: "always", priority: 0.9 },
     { path: "/validators", changeFrequency: "hourly", priority: 0.8 },
     { path: "/tokens", changeFrequency: "hourly", priority: 0.8 },
-    { path: "/leaderboard", changeFrequency: "hourly", priority: 0.7 },
+    { path: "/leaderboard/account/holders", changeFrequency: "hourly", priority: 0.7 },
+    { path: "/leaderboard/token/holders",   changeFrequency: "hourly", priority: 0.6 },
+    { path: "/leaderboard/validator/stake", changeFrequency: "hourly", priority: 0.6 },
+    { path: "/leaderboard/whale/recent",    changeFrequency: "always", priority: 0.6 },
+    { path: "/leaderboard/compare",         changeFrequency: "monthly", priority: 0.5 },
     { path: "/search", changeFrequency: "monthly", priority: 0.5 },
   ];
 

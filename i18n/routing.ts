@@ -1,10 +1,10 @@
 import { defineRouting } from "next-intl/routing";
 
-// DECISION: default locale ID (Indonesia) per user spec. `localePrefix: "always"` forces /id or
-// /en in the URL — cleaner for SEO and matches the user's requested /id/* and /en/* structure.
+// DECISION: default locale EN per updated user spec. Routes both /id and /en are prerendered;
+// `localePrefix: "always"` forces a locale in the URL for SEO clarity.
 export const routing = defineRouting({
   locales: ["id", "en"],
-  defaultLocale: "id",
+  defaultLocale: "en",
   localePrefix: "always",
 });
 

@@ -13,6 +13,7 @@ import { Timestamp } from "@/components/common/Timestamp";
 import { InfoRow } from "@/components/common/InfoRow";
 import { Copyable } from "@/components/common/Copyable";
 import { Pagination } from "@/components/common/Pagination";
+import { PageHeader } from "@/components/common/PageHeader";
 import { useNetwork } from "@/lib/network-context";
 import { useBlock } from "@/lib/hooks";
 
@@ -46,7 +47,7 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Block #{height} not found</p>
-            <Link href="/blocks" className="text-blue-500 hover:underline text-sm mt-2 inline-block">Back to blocks</Link>
+            <Link href="/blocks" className="text-primary hover:underline text-sm mt-2 inline-block">Back to blocks</Link>
           </CardContent>
         </Card>
       </div>
@@ -58,28 +59,24 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-            <Blocks className="h-5 w-5 text-blue-500" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">Block</p>
-            <h1 className="text-2xl font-bold tracking-tight font-mono">#{block.index.toLocaleString()}</h1>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          {blockHeight > 0 && (
-            <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
-              <ChevronLeft className="h-4 w-4" /> Prev
+      <PageHeader
+        icon={Blocks}
+        eyebrow="Block Height"
+        title={`#${block.index.toLocaleString()}`}
+        mono
+        actions={
+          <div className="flex gap-2">
+            {blockHeight > 0 && (
+              <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </Link>
+            )}
+            <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
+              Next <ChevronRight className="h-4 w-4" />
             </Link>
-          )}
-          <Link href={`/blocks/${blockHeight + 1}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted border border-border rounded-lg px-3 py-1.5 transition-colors">
-            Next <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
@@ -112,7 +109,7 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
                 label="Parent Hash"
                 value={
                   blockHeight > 0 ? (
-                    <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-2 font-mono text-blue-500 hover:underline break-all">
+                    <Link href={`/blocks/${blockHeight - 1}`} className="inline-flex items-center gap-2 font-mono text-primary hover:underline break-all">
                       {block.previous_hash}
                       <Copyable text={block.previous_hash} bare />
                     </Link>
@@ -127,7 +124,7 @@ export default function BlockDetailPage({ params }: { params: Promise<{ height: 
                   <div className="flex items-center gap-2 flex-wrap">
                     <Address address={block.validator} truncate={false} />
                     {block.validator_name && (
-                      <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                      <span className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
                         {block.validator_name}
                       </span>
                     )}

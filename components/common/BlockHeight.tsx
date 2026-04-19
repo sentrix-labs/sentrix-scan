@@ -22,7 +22,7 @@ export function BlockHeight({
 
   const classes = cn(
     "font-mono font-medium hover:underline",
-    muted ? "text-muted-foreground hover:text-blue-500" : "text-blue-500",
+    muted ? "text-muted-foreground hover:text-primary" : "text-primary",
     className,
   );
 
