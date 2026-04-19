@@ -3,11 +3,14 @@
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useRef, useEffect } from "react";
-import { Search, Sun, Moon, Menu, X, Globe, Check, ChevronDown, Users, Coins, Shield, FileCode, Fish, GitCompare } from "lucide-react";
+import {
+  Search, Sun, Moon, Menu, X, Globe, Check, ChevronDown,
+  Users, Coins, Shield, FileCode, Fish, GitCompare,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import { useNetwork } from "@/lib/network-context";
 import { detectSearchType } from "@/lib/format";
-import { Button } from "@/components/ui/button";
+import { SentrixLogo } from "@/components/common/Logo";
 import { routing } from "@/i18n/routing";
 
 const LOCALE_LABELS: Record<string, { flag: string; label: string }> = {
@@ -26,11 +29,20 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const lbRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // DECISION: Cmd+K / Ctrl+K focuses the search input (Etherscan/Linear convention)
+  // Scroll state for translucent → solid nav background
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // ⌘K / Ctrl-K focuses search
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -80,70 +92,76 @@ export function Header() {
   ];
 
   const LEADERBOARD_ITEMS = [
-    { href: "/leaderboard/account/holders", label: "Account",   icon: Users,      color: "text-blue-500" },
-    { href: "/leaderboard/token/holders",   label: "Token",     icon: Coins,      color: "text-yellow-500" },
-    { href: "/leaderboard/validator/stake", label: "Validator", icon: Shield,     color: "text-purple-500" },
-    { href: "/leaderboard/contract/calls",  label: "Contract",  icon: FileCode,   color: "text-cyan-500" },
-    { href: "/leaderboard/whale/recent",    label: "Whale",     icon: Fish,       color: "text-green-500" },
-    { href: "/leaderboard/compare",         label: "Compare",   icon: GitCompare, color: "text-pink-500" },
+    { href: "/leaderboard/account/holders", label: "Account",   icon: Users,      color: "text-[var(--cyan)]" },
+    { href: "/leaderboard/token/holders",   label: "Token",     icon: Coins,      color: "text-[var(--gold)]" },
+    { href: "/leaderboard/validator/stake", label: "Validator", icon: Shield,     color: "text-[var(--purple)]" },
+    { href: "/leaderboard/contract/calls",  label: "Contract",  icon: FileCode,   color: "text-[var(--cyan)]" },
+    { href: "/leaderboard/whale/recent",    label: "Whale",     icon: Fish,       color: "text-[var(--green)]" },
+    { href: "/leaderboard/compare",         label: "Compare",   icon: GitCompare, color: "text-[var(--pink)]" },
   ] as const;
   const leaderboardActive = pathname.startsWith("/leaderboard");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-[20px] ${
+        scrolled
+          ? "border-b border-[var(--brd)] bg-[var(--bk)]/90"
+          : "border-b border-transparent bg-[var(--bk)]/60"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 h-16 flex items-center gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-sm">
-            <span className="text-white font-bold text-sm">S</span>
-          </div>
-          <span className="font-semibold text-lg hidden sm:inline tracking-tight">
-            Sentrix<span className="text-blue-500 ml-0.5">Scan</span>
+        <Link href="/" className="flex items-center gap-2.5 text-[var(--gold)] shrink-0">
+          <SentrixLogo size={32} />
+          <span className="hidden sm:inline font-serif text-[17px] font-light tracking-[.22em] uppercase pr-[.22em]">
+            SENTRI<span className="text-[var(--gold-l)] font-normal">X</span>
+            <span className="ml-1.5 text-[10px] tracking-[.15em] text-[var(--tx-d)] font-sans uppercase">Scan</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1 ml-2">
           {NAV_LINKS.map((l) => {
             const active = l.href === "/" ? pathname === "/" : pathname.startsWith(l.href);
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`px-3 py-2 text-sm transition-colors rounded-md ${
+                className={`px-3 py-1.5 text-[11px] font-light tracking-[.1em] uppercase transition-all duration-200 rounded-full border ${
                   active
-                    ? "text-foreground bg-accent/80 font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    ? "text-[var(--gold)] bg-[color-mix(in_oklab,var(--gold)_6%,transparent)] border-[color-mix(in_oklab,var(--gold)_15%,transparent)]"
+                    : "text-[var(--tx-d)] border-transparent hover:text-[var(--gold)]"
                 }`}
               >
                 {t(l.key)}
               </Link>
             );
           })}
+
           {/* Leaderboard dropdown */}
           <div className="relative" ref={lbRef}>
             <button
               type="button"
               onClick={() => setLbOpen(!lbOpen)}
-              className={`inline-flex items-center gap-1 px-3 py-2 text-sm transition-colors rounded-md ${
+              className={`inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-light tracking-[.1em] uppercase transition-all duration-200 rounded-full border ${
                 leaderboardActive
-                  ? "text-foreground bg-accent/80 font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  ? "text-[var(--gold)] bg-[color-mix(in_oklab,var(--gold)_6%,transparent)] border-[color-mix(in_oklab,var(--gold)_15%,transparent)]"
+                  : "text-[var(--tx-d)] border-transparent hover:text-[var(--gold)]"
               }`}
             >
               {t("leaderboard")}
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${lbOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`h-3 w-3 transition-transform ${lbOpen ? "rotate-180" : ""}`} />
             </button>
             {lbOpen && (
-              <div className="absolute left-0 top-full mt-1 w-56 bg-popover border border-border rounded-lg shadow-lg py-1.5 z-50">
+              <div className="absolute left-0 top-full mt-2 w-56 bg-[var(--bk)]/95 backdrop-blur-xl border border-[var(--brd)] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,.3)] py-1.5 z-50">
                 {LEADERBOARD_ITEMS.map(({ href, label, icon: Icon, color }) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={() => setLbOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent text-foreground"
+                    className="flex items-center gap-3 px-3 py-2 text-[11px] tracking-[.1em] uppercase text-[var(--tx-m)] hover:text-[var(--gold)] hover:bg-[color-mix(in_oklab,var(--gold)_5%,transparent)] transition-colors"
                   >
-                    <Icon className={`h-4 w-4 ${color}`} />
+                    <Icon className={`h-3.5 w-3.5 ${color}`} />
                     <span>{label}</span>
                   </Link>
                 ))}
@@ -153,18 +171,18 @@ export function Header() {
         </nav>
 
         {/* Search */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-md hidden md:flex">
+        <form onSubmit={handleSearch} className="flex-1 max-w-md hidden lg:flex">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--tx-d)]" />
             <input
               ref={searchRef}
               type="text"
               placeholder={t("search_placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-12 text-sm bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all"
+              className="w-full h-9 pl-9 pr-12 text-[12px] bg-[color-mix(in_oklab,var(--foreground)_3%,transparent)] border border-[var(--brd)] rounded-full tracking-[.05em] placeholder:text-[var(--tx-d)] focus:outline-none focus:border-[var(--gold)] focus:bg-[color-mix(in_oklab,var(--gold)_4%,transparent)] transition-all"
             />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-muted-foreground bg-background/80 border border-border rounded px-1.5 py-0.5 hidden lg:inline-block">
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[var(--tx-d)] border border-[var(--brd)] rounded px-1.5 py-0.5 hidden xl:inline-block">
               ⌘K
             </kbd>
           </div>
@@ -172,97 +190,95 @@ export function Header() {
 
         {/* Right controls */}
         <div className="flex items-center gap-2 ml-auto md:ml-0">
-          {/* Language switcher */}
+          {/* Language */}
           <div className="relative" ref={langRef}>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               onClick={() => setLangOpen(!langOpen)}
-              className="h-8 gap-1 px-2"
+              className="h-8 px-2.5 inline-flex items-center gap-1 text-[11px] tracking-[.1em] uppercase text-[var(--tx-m)] hover:text-[var(--gold)] rounded-full border border-transparent hover:border-[var(--brd)] transition-colors"
               aria-label="Switch language"
             >
               <Globe className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline text-xs uppercase">{locale}</span>
-            </Button>
+              <span className="hidden sm:inline">{locale}</span>
+            </button>
             {langOpen && (
-              <div className="absolute right-0 top-full mt-1 w-44 bg-popover border border-border rounded-lg shadow-lg py-1 z-50">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-[var(--bk)]/95 backdrop-blur-xl border border-[var(--brd)] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,.3)] py-1 z-50">
                 {routing.locales.map((l) => (
                   <button
                     key={l}
                     onClick={() => switchLocale(l)}
-                    className="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-accent"
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-[12px] hover:bg-[color-mix(in_oklab,var(--gold)_5%,transparent)] text-[var(--tx-m)] hover:text-[var(--gold)]"
                   >
                     <span className="text-base leading-none">{LOCALE_LABELS[l].flag}</span>
                     <span className="flex-1 text-left">{LOCALE_LABELS[l].label}</span>
-                    {l === locale && <Check className="h-3.5 w-3.5 text-blue-500" />}
+                    {l === locale && <Check className="h-3.5 w-3.5 text-[var(--gold)]" />}
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Network switcher */}
-          <Button variant="outline" size="sm" onClick={toggle} className="text-xs h-8 gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${network === "mainnet" ? "bg-green-500" : "bg-orange-500"}`} />
+          {/* Network */}
+          <button
+            onClick={toggle}
+            className="inline-flex items-center gap-1.5 h-8 px-3 text-[10px] tracking-[.1em] uppercase font-light rounded-full border border-[var(--brd)] text-[var(--tx-m)] hover:text-[var(--gold)] hover:border-[var(--brd2)] transition-colors"
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${network === "mainnet" ? "bg-[var(--green)]" : "bg-[var(--orange)]"} animate-pulse-live`} />
             <span className="hidden sm:inline">{network === "mainnet" ? "Mainnet" : "Testnet"}</span>
-            <span className="text-[10px] font-mono text-muted-foreground hidden lg:inline ml-0.5">
+            <span className="hidden lg:inline text-[9px] font-mono text-[var(--tx-d)]">
               {network === "mainnet" ? "7119" : "7120"}
             </span>
-          </Button>
+          </button>
 
-          {/* Theme toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Theme */}
+          <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full border border-transparent hover:border-[var(--brd)] text-[var(--tx-m)] hover:text-[var(--gold)] transition-colors"
             aria-label="Toggle theme"
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          </Button>
+          </button>
 
           {/* Mobile menu */}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="h-8 w-8 p-0 md:hidden"
+            className="md:hidden h-8 w-8 inline-flex items-center justify-center rounded-full text-[var(--gold)]"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background p-4 space-y-3">
+        <div className="md:hidden border-t border-[var(--brd)] bg-[var(--bk)]/97 backdrop-blur-[30px] p-5 space-y-3 animate-fade-in">
           <form onSubmit={handleSearch}>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--tx-d)]" />
               <input
                 type="text"
                 placeholder={t("search_placeholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full h-9 pl-9 pr-4 text-sm bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-full h-9 pl-9 pr-4 text-[12px] bg-[color-mix(in_oklab,var(--foreground)_3%,transparent)] border border-[var(--brd)] rounded-full focus:outline-none focus:border-[var(--gold)]"
               />
             </div>
           </form>
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col">
             {NAV_LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setMobileOpen(false)}
-                className="px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-accent"
+                className="py-3 text-[12px] tracking-[.1em] uppercase text-[var(--tx-m)] border-b border-[var(--brd)] hover:text-[var(--gold)]"
               >
                 {t(l.key)}
               </Link>
             ))}
-            <div className="pt-2 mt-2 border-t border-border">
-              <p className="px-3 pb-1 text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+            <div className="pt-3 mt-1">
+              <p className="py-2 text-[10px] tracking-[.2em] uppercase text-[var(--tx-d)]">
                 {t("leaderboard")}
               </p>
               {LEADERBOARD_ITEMS.map(({ href, label, icon: Icon, color }) => (
@@ -270,9 +286,9 @@ export function Header() {
                   key={href}
                   href={href}
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md hover:bg-accent"
+                  className="flex items-center gap-3 py-3 text-[12px] tracking-[.1em] uppercase text-[var(--tx-m)] hover:text-[var(--gold)] border-b border-[var(--brd)]"
                 >
-                  <Icon className={`h-4 w-4 ${color}`} />
+                  <Icon className={`h-3.5 w-3.5 ${color}`} />
                   {label}
                 </Link>
               ))}
