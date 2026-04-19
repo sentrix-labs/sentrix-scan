@@ -45,7 +45,7 @@ export default function TokenDetailPage({ params }: { params: Promise<{ addr: st
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Token not found</p>
-            <Link href="/tokens" className="text-blue-500 hover:underline text-sm mt-2 inline-block">Back to tokens</Link>
+            <Link href="/tokens" className="text-primary hover:underline text-sm mt-2 inline-block">Back to tokens</Link>
           </CardContent>
         </Card>
       </div>

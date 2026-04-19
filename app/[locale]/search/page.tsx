@@ -16,7 +16,7 @@ function SearchContent() {
     return (
       <div className="text-center space-y-4">
         <p className="text-muted-foreground">Redirecting to block #{query}...</p>
-        <Link href={`/blocks/${query}`} className="text-blue-500 hover:underline">
+        <Link href={`/blocks/${query}`} className="text-primary hover:underline">
           View Block #{query}
         </Link>
       </div>
@@ -27,7 +27,7 @@ function SearchContent() {
     return (
       <div className="text-center space-y-4">
         <p className="text-muted-foreground">Redirecting to transaction...</p>
-        <Link href={`/tx/${query}`} className="text-blue-500 hover:underline">
+        <Link href={`/tx/${query}`} className="text-primary hover:underline">
           View Transaction
         </Link>
       </div>
@@ -38,7 +38,7 @@ function SearchContent() {
     return (
       <div className="text-center space-y-4">
         <p className="text-muted-foreground">Redirecting to address...</p>
-        <Link href={`/address/${query}`} className="text-blue-500 hover:underline">
+        <Link href={`/address/${query}`} className="text-primary hover:underline">
           View Address
         </Link>
       </div>
@@ -54,7 +54,7 @@ function SearchContent() {
       <p className="text-xs text-muted-foreground">
         Try searching by block height (number), transaction hash (0x + 64 hex), or address (0x + 40 hex)
       </p>
-      <Link href="/" className="text-blue-500 hover:underline text-sm inline-block">
+      <Link href="/" className="text-primary hover:underline text-sm inline-block">
         Back to home
       </Link>
     </div>

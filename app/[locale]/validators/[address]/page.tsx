@@ -78,7 +78,7 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Validator not found</p>
             <p className="text-xs font-mono text-muted-foreground mt-2 break-all">{address}</p>
-            <Link href="/validators" className="text-blue-500 hover:underline text-sm mt-4 inline-block">Back to validators</Link>
+            <Link href="/validators" className="text-primary hover:underline text-sm mt-4 inline-block">Back to validators</Link>
           </CardContent>
         </Card>
       </div>

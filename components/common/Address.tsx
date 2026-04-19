@@ -57,7 +57,7 @@ export function Address({
 
   const linkClasses = cn(
     "font-mono text-sm hover:underline rounded px-0.5 -mx-0.5 transition-colors",
-    muted ? "text-muted-foreground hover:text-blue-500" : "text-blue-500",
+    muted ? "text-muted-foreground hover:text-primary" : "text-primary",
     className,
   );
 

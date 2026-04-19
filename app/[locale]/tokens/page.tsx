@@ -105,14 +105,14 @@ export default function TokensPage() {
                               {token.symbol.slice(0, 2).toUpperCase()}
                             </span>
                             <span className="flex flex-col">
-                              <span className="font-medium text-sm text-blue-500 hover:underline">{token.name}</span>
+                              <span className="font-medium text-sm text-primary hover:underline">{token.name}</span>
                               <span className="text-muted-foreground text-xs">{token.symbol}</span>
                             </span>
                           </Link>
                         </td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1">
-                            <Link href={`/tokens/${token.contract_address}`} className="font-mono text-xs text-blue-500 hover:underline">
+                            <Link href={`/tokens/${token.contract_address}`} className="font-mono text-xs text-primary hover:underline">
                               {shortenAddress(token.contract_address)}
                             </Link>
                             <Copyable text={token.contract_address} bare />

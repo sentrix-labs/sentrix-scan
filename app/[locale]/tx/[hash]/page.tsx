@@ -36,7 +36,7 @@ export default function TxDetailPage({ params }: { params: Promise<{ hash: strin
           <CardContent className="p-8 text-center">
             <p className="text-muted-foreground">Transaction not found</p>
             <p className="text-xs font-mono text-muted-foreground mt-2 break-all">{hash}</p>
-            <Link href="/" className="text-blue-500 hover:underline text-sm mt-4 inline-block">Back to home</Link>
+            <Link href="/" className="text-primary hover:underline text-sm mt-4 inline-block">Back to home</Link>
           </CardContent>
         </Card>
       </div>
@@ -122,7 +122,7 @@ export default function TxDetailPage({ params }: { params: Promise<{ hash: strin
                 <InfoRow
                   label="Type"
                   value={
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
                       {tx.tx_type}
                     </span>
                   }

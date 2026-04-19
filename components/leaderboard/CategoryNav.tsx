@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 // category names stay English for technical clarity). Path matching is "startsWith" so every
 // sub-page lights up the parent category.
 const CATEGORIES = [
-  { base: "/leaderboard/account",   label: "Account",   icon: Users,      color: "text-blue-500" },
+  { base: "/leaderboard/account",   label: "Account",   icon: Users,      color: "text-[var(--blue)]" },
   { base: "/leaderboard/token",     label: "Token",     icon: Coins,      color: "text-yellow-500" },
   { base: "/leaderboard/validator", label: "Validator", icon: Shield,     color: "text-purple-500" },
   { base: "/leaderboard/contract",  label: "Contract",  icon: FileCode,   color: "text-cyan-500" },

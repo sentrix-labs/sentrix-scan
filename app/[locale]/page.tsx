@@ -47,7 +47,7 @@ function StatCard({
   const { num, unit } = splitValue(value);
   return (
     <div
-      className="group relative overflow-hidden bg-[color-mix(in_oklab,var(--card)_60%,transparent)] hover:bg-[var(--card)] border border-[var(--brd)] hover:border-[color-mix(in_oklab,var(--gold)_20%,var(--brd))] rounded-2xl px-5 py-6 md:px-6 md:py-7 transition-all duration-500"
+      className="group relative overflow-hidden bg-[color-mix(in_oklab,var(--card)_60%,transparent)] hover:bg-[var(--card)] border border-[var(--brd)] hover:border-[color-mix(in_oklab,var(--gold)_20%,var(--brd))] rounded-2xl px-4 py-5 md:px-5 md:py-6 transition-all duration-500 min-w-0"
     >
       {/* Animated corner lines */}
       <span
@@ -59,15 +59,19 @@ function StatCard({
         style={{ background: `linear-gradient(to bottom, ${accent}, transparent)` }}
       />
 
-      <div className="font-serif text-[32px] md:text-[40px] font-light tracking-tight leading-none mb-2">
+      <div
+        className="font-serif font-light tracking-tight leading-none mb-2 truncate"
+        style={{ fontSize: "clamp(22px, 3.2vw, 38px)" }}
+        title={value}
+      >
         {loading ? (
-          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-9 w-24" />
         ) : (
           <>
             <span>{num}</span>
             {unit && (
               <em
-                className="not-italic ml-1 transition-all duration-500 group-hover:[text-shadow:0_0_16px_currentColor]"
+                className="not-italic ml-1 text-[0.7em] transition-all duration-500 group-hover:[text-shadow:0_0_16px_currentColor]"
                 style={{ color: accent }}
               >
                 {unit}
@@ -76,7 +80,7 @@ function StatCard({
           </>
         )}
       </div>
-      <div className="font-mono text-[10px] text-[var(--tx-d)] tracking-[.22em] uppercase group-hover:text-[var(--tx-m)] transition-colors">
+      <div className="font-mono text-[10px] text-[var(--tx-d)] tracking-[.22em] uppercase group-hover:text-[var(--tx-m)] transition-colors truncate">
         {label}
       </div>
     </div>
@@ -209,10 +213,10 @@ export default function HomePage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <Blocks className="h-4 w-4 text-blue-500" />
+                <Blocks className="h-4 w-4 text-primary" />
                 {t("latest_blocks")}
               </CardTitle>
-              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">{t("view_all")}</Link>
+              <Link href="/blocks" className="text-xs text-primary hover:underline">{t("view_all")}</Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-0 p-0">
@@ -225,8 +229,8 @@ export default function HomePage() {
                 {blocks.slice(0, 10).map((block) => (
                   <div key={block.index} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-muted/40 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-8 w-8 rounded-md bg-blue-500/10 flex items-center justify-center shrink-0">
-                        <Blocks className="h-3.5 w-3.5 text-blue-500" />
+                      <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                        <Blocks className="h-3.5 w-3.5 text-primary" />
                       </div>
                       <div className="min-w-0">
                         <BlockHeight height={block.index} prefix="#" className="text-sm" />
@@ -262,10 +266,10 @@ export default function HomePage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4 text-blue-500" />
+                <ArrowUpDown className="h-4 w-4 text-primary" />
                 {t("latest_transactions")}
               </CardTitle>
-              <Link href="/blocks" className="text-xs text-blue-500 hover:underline">{t("view_all")}</Link>
+              <Link href="/blocks" className="text-xs text-primary hover:underline">{t("view_all")}</Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-0 p-0">

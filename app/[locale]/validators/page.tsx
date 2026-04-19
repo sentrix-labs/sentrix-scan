@@ -142,7 +142,7 @@ export default function ValidatorsPage() {
                   onClick={() => { setStatusFilter(s); setPage(1); }}
                   className={`text-xs px-2.5 py-1 rounded-md border capitalize transition-colors ${
                     statusFilter === s
-                      ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                      ? "bg-primary/10 text-primary border-primary/30"
                       : "border-border text-muted-foreground hover:bg-accent"
                   }`}
                 >
@@ -179,7 +179,7 @@ export default function ValidatorsPage() {
                         <td className="px-4 py-2.5">
                           <div className="flex flex-col gap-0.5">
                             {v.name && (
-                              <Link href={`/validators/${v.address}`} className="font-medium text-sm text-blue-500 hover:underline">
+                              <Link href={`/validators/${v.address}`} className="font-medium text-sm text-primary hover:underline">
                                 {v.name}
                               </Link>
                             )}

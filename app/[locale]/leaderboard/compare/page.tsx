@@ -73,7 +73,7 @@ function CompareInner() {
                   onClick={() => setType(t)}
                   className={`text-xs px-3 py-1 rounded-md border transition-colors ${
                     type === t
-                      ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                      ? "bg-primary/10 text-primary border-primary/30"
                       : "border-border text-muted-foreground hover:bg-accent"
                   }`}
                 >

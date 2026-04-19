@@ -68,7 +68,7 @@ export function ValidatorRanking({ sort }: { sort: Sort }) {
                         <td className="px-4 py-2.5">
                           <div className="flex flex-col gap-0.5">
                             {v.name && (
-                              <Link href={`/validators/${v.address}`} className="font-medium text-sm text-blue-500 hover:underline">
+                              <Link href={`/validators/${v.address}`} className="font-medium text-sm text-primary hover:underline">
                                 {v.name}
                               </Link>
                             )}

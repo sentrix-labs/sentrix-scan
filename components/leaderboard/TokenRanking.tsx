@@ -75,14 +75,14 @@ export function TokenRanking({ sort }: { sort: Sort }) {
                               {t.symbol.slice(0, 2).toUpperCase()}
                             </span>
                             <span className="flex flex-col min-w-0">
-                              <span className="font-medium text-sm text-blue-500 hover:underline truncate">{t.name}</span>
+                              <span className="font-medium text-sm text-primary hover:underline truncate">{t.name}</span>
                               <span className="text-muted-foreground text-xs">{t.symbol}</span>
                             </span>
                           </Link>
                         </td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1">
-                            <Link href={`/tokens/${t.contract_address}`} className="font-mono text-xs text-blue-500 hover:underline">
+                            <Link href={`/tokens/${t.contract_address}`} className="font-mono text-xs text-primary hover:underline">
                               {shortenAddress(t.contract_address)}
                             </Link>
                             <Copyable text={t.contract_address} bare />

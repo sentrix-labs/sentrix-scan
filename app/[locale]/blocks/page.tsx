@@ -35,8 +35,8 @@ export default function BlocksPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-          <Blocks className="h-5 w-5 text-blue-500" />
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Blocks className="h-5 w-5 text-primary" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
         {blocks && (

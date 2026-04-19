@@ -26,9 +26,9 @@ const STYLES: Record<Status, { bg: string; text: string; border: string; icon: R
     label: "Pending",
   },
   info: {
-    bg: "bg-blue-500/10",
-    text: "text-blue-500",
-    border: "border-blue-500/20",
+    bg: "bg-[color-mix(in_oklab,var(--blue)_12%,transparent)]",
+    text: "text-[var(--blue)]",
+    border: "border-[color-mix(in_oklab,var(--blue)_25%,transparent)]",
     icon: Info,
     label: "Info",
   },

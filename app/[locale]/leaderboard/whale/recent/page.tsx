@@ -53,7 +53,7 @@ export default function WhaleRecentPage() {
               onClick={() => setThreshold(v)}
               className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
                 threshold === v
-                  ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                  ? "bg-primary/10 text-primary border-primary/30"
                   : "border-border text-muted-foreground hover:bg-accent"
               }`}
             >
@@ -94,7 +94,7 @@ export default function WhaleRecentPage() {
                     </td>
                     <td className="px-4 py-2.5"><Address address={t.from} muted showCopy={false} className="text-xs" /></td>
                     <td className="px-4 py-2.5"><Address address={t.to} muted showCopy={false} className="text-xs" /></td>
-                    <td className="px-4 py-2.5 text-right font-mono font-semibold text-blue-500">
+                    <td className="px-4 py-2.5 text-right font-mono font-semibold text-primary">
                       {formatNumber(t.amount)} SRX
                     </td>
                   </tr>

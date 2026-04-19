@@ -43,7 +43,7 @@ export default function WhaleTopWalletsPage() {
               onClick={() => setThreshold(v)}
               className={`text-xs px-2.5 py-1 rounded-md border transition-colors ${
                 threshold === v
-                  ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                  ? "bg-primary/10 text-primary border-primary/30"
                   : "border-border text-muted-foreground hover:bg-accent"
               }`}
             >

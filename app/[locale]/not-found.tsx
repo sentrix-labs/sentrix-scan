@@ -9,8 +9,8 @@ export default function NotFound() {
     <div className="max-w-2xl mx-auto px-4 py-16">
       <Card>
         <CardContent className="p-8 text-center space-y-4">
-          <div className="mx-auto h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-            <Search className="h-6 w-6 text-blue-500" />
+          <div className="mx-auto h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <Search className="h-6 w-6 text-primary" />
           </div>
           <h1 className="text-2xl font-bold">{t("not_found_page.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("not_found_page.description")}</p>

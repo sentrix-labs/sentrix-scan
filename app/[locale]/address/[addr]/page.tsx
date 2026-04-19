@@ -35,8 +35,8 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-          <Wallet className="h-5 w-5 text-blue-500" />
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Wallet className="h-5 w-5 text-primary" />
         </div>
         <div>
           <p className="text-xs text-muted-foreground uppercase tracking-wider">Address</p>
@@ -97,7 +97,7 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
                     onClick={() => setDirFilter(f)}
                     className={`text-xs px-3 py-1 rounded-md border transition-colors ${
                       dirFilter === f
-                        ? "bg-blue-500/10 text-blue-500 border-blue-500/30"
+                        ? "bg-primary/10 text-primary border-primary/30"
                         : "border-border text-muted-foreground hover:bg-accent"
                     }`}
                   >
