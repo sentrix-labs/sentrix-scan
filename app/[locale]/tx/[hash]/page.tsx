@@ -14,24 +14,11 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { Copyable } from "@/components/common/Copyable";
 import { useNetwork } from "@/lib/network-context";
 import { useTransaction } from "@/lib/hooks";
-import { useBlocks } from "@/lib/hooks";
-
-// DECISION: backend TransactionData doesn't include block_height; we scan recent blocks to find
-// the containing block. If not found, display "Unknown" with TODO comment.
-// TODO(api): needs block_height on TransactionData — currently inferred via block scan
-function useContainingBlock(hash: string) {
-  const { network } = useNetwork();
-  const { data: blocks } = useBlocks(network, 100);
-  if (!blocks) return null;
-  const found = blocks.find((b) => b.transactions?.some((t) => t.id === hash));
-  return found ?? null;
-}
 
 export default function TxDetailPage({ params }: { params: Promise<{ hash: string }> }) {
   const { hash } = use(params);
   const { network } = useNetwork();
   const { data: tx, loading } = useTransaction(network, hash);
-  const containingBlock = useContainingBlock(hash);
 
   if (loading) {
     return (
@@ -93,10 +80,10 @@ export default function TxDetailPage({ params }: { params: Promise<{ hash: strin
                 }
               />
               <InfoRow label="Status" value={<StatusBadge status={success ? "success" : "failed"} />} />
-              {containingBlock && (
+              {tx.block_height !== undefined && (
                 <InfoRow
                   label="Block"
-                  value={<BlockHeight height={containingBlock.index} prefix="#" />}
+                  value={<BlockHeight height={tx.block_height} prefix="#" />}
                 />
               )}
               <InfoRow label="Timestamp" value={<Timestamp timestamp={tx.timestamp} absolute />} />

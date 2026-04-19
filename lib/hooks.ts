@@ -7,8 +7,10 @@ import {
   fetchChainInfo, fetchLatestBlocks, fetchLatestTransactions,
   fetchBlock, fetchTransaction, fetchAccountBalance,
   fetchAccountHistory, fetchValidators, fetchTokens,
+  fetchRichlist, fetchTokenHolders, fetchTokenTrades,
   type ChainInfo, type BlockData, type TransactionData,
   type ValidatorData, type AccountBalance, type TokenData,
+  type TopHolder, type TokenHolder, type TokenTransfer,
 } from "./api";
 
 interface UsePollingReturn<T> {
@@ -166,5 +168,29 @@ export function useTokens(network: NetworkId) {
     () => fetchTokens(network),
     30000,
     [network]
+  );
+}
+
+export function useRichlist(network: NetworkId, limit = 100) {
+  return usePolling<TopHolder[]>(
+    () => fetchRichlist(network, limit),
+    30000,
+    [network, limit],
+  );
+}
+
+export function useTokenHolders(network: NetworkId, contract: string, limit = 50) {
+  return usePolling<TokenHolder[]>(
+    () => fetchTokenHolders(network, contract, limit),
+    30000,
+    [network, contract, limit],
+  );
+}
+
+export function useTokenTrades(network: NetworkId, contract: string, page = 1, limit = 20) {
+  return usePolling<TokenTransfer[]>(
+    () => fetchTokenTrades(network, contract, page, limit),
+    15000,
+    [network, contract, page, limit],
   );
 }
