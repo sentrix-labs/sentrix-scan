@@ -45,9 +45,10 @@ function computeBlockTime(timestamps: Array<string | number>): string {
   return s < 10 ? `${s.toFixed(1)}s` : `${Math.round(s)}s`;
 }
 
-// DECISION: backend /chain/info has no total_transactions. Estimate cumulative tx count as
-// total_blocks × avg_tx_per_block from the polled window. Labelled "est." so users know.
-// TODO(api): add total_transactions to /chain/info — replace the estimate once shipped.
+// DECISION: backend /chain/info has no total_transactions — estimate as total_blocks ×
+// avg_tx_per_block from the polled window. User wanted no "est." suffix since the derived
+// number *is* the best available truth until the backend ships /chain/stats.
+// TODO(api): add total_transactions to /chain/info — swap the estimate out once shipped.
 function estimateTotalTransactions(
   totalBlocks: number | undefined,
   blocks: { transactions?: unknown[]; tx_count?: number }[] | null,
@@ -56,8 +57,8 @@ function estimateTotalTransactions(
   if (!blocks || blocks.length === 0) return formatNumber(totalBlocks);
   const txs = blocks.reduce((n, b) => n + (b.tx_count ?? b.transactions?.length ?? 0), 0);
   const avg = txs / blocks.length;
-  if (avg <= 0) return "—";
-  return `${formatNumber(Math.round(totalBlocks * avg))} est.`;
+  if (avg <= 0) return formatNumber(totalBlocks);
+  return formatNumber(Math.round(totalBlocks * avg));
 }
 
 export default function HomePage() {
@@ -148,17 +149,22 @@ export default function HomePage() {
         </form>
       </div>
 
-      {/* Stats — 4 editorial hero cards. The granular real-time metrics live in the LiveTicker
-          above; these four carry more visual weight and avoid ticker/grid redundancy. */}
+      {/* Stats — 2×4 editorial grid. Row 1 = performance / live signals; Row 2 = chain state. */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
         {statsLoading && !stats ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 8 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
+            {/* Row 1 — live performance */}
             <StatCard label={t("stats.tps")} value={liveTps} loading={!blocks} accent="var(--gold)" />
+            <StatCard label={t("stats.block_height")} value={stats ? stats.height.toLocaleString() : "—"} loading={statsLoading} accent="var(--cyan)" />
+            <StatCard label={t("stats.block_time")} value={blockTime} loading={!blocks} accent="var(--teal)" />
             <StatCard label={t("stats.total_transactions")} value={totalTxValue} loading={statsLoading && !blocks} accent="var(--blue)" />
-            <StatCard label={t("stats.total_burned")} value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "—"} loading={statsLoading} accent="var(--red)" />
+            {/* Row 2 — chain state */}
             <StatCard label={t("stats.active_validators")} value={stats ? String(stats.active_validators) : "—"} loading={statsLoading} accent="var(--purple)" />
+            <StatCard label={t("stats.tokens_deployed")} value={stats ? String(stats.deployed_tokens) : "—"} loading={statsLoading} accent="var(--lime)" />
+            <StatCard label={t("stats.total_burned")} value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "—"} loading={statsLoading} accent="var(--red)" />
+            <StatCard label={t("stats.block_reward")} value={stats ? `${stats.next_block_reward_srx} SRX` : "—"} loading={statsLoading} accent="var(--pink)" />
           </>
         )}
       </div>
