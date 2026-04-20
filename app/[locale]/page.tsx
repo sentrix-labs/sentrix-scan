@@ -163,6 +163,38 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* SRX Supply progress — shows circulating / max with Playfair percent + thin bar */}
+      {stats && (
+        <Card>
+          <CardContent className="p-6 md:p-8">
+            <div className="flex items-end justify-between gap-4 mb-4 flex-wrap">
+              <div className="min-w-0">
+                <p className="eyebrow mb-2">Supply in Circulation</p>
+                <div className="flex items-baseline gap-3">
+                  <span className="font-serif font-light leading-none" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>
+                    {((stats.total_minted_srx / 210_000_000) * 100).toFixed(2)}
+                    <em className="not-italic text-[0.6em] ml-1 text-[var(--gold)]">%</em>
+                  </span>
+                  <span className="font-mono text-xs text-[var(--tx-m)]">
+                    {formatSRX(stats.total_minted_srx)} of {formatNumber(210_000_000)} SRX
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-[11px] font-mono text-[var(--tx-d)] uppercase tracking-[.15em]">
+                <span>Burned <span className="text-[var(--red)]">{stats.total_burned_srx.toFixed(4)}</span></span>
+                <span>Next Reward <span className="text-[var(--gold)]">{stats.next_block_reward_srx} SRX</span></span>
+              </div>
+            </div>
+            <div className="relative h-1.5 w-full rounded-full bg-[color-mix(in_oklab,var(--foreground)_6%,transparent)] overflow-hidden">
+              <div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-l)] rounded-full"
+                style={{ width: `${Math.min(100, (stats.total_minted_srx / 210_000_000) * 100)}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* TPS chart — fed by backend /chain/performance */}
       <StatsChart
         performance={performance}

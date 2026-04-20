@@ -11,12 +11,14 @@ import {
   fetchChainPerformance,
   fetchAccountTokens, fetchValidatorRewards, fetchValidatorBlocksOverTime,
   fetchValidatorDelegators, fetchMempool, fetchCurrentEpoch, fetchChainStatus,
+  fetchEventLogs,
   type ChainInfo, type BlockData, type TransactionData,
   type ValidatorData, type AccountBalance, type TokenData,
   type TopHolder, type TokenHolder, type TokenTransfer,
   type ChainPerformance,
   type AccountTokenHolding, type ValidatorReward, type ValidatorBlocksPoint,
   type ValidatorDelegator, type MempoolSnapshot, type EpochInfo, type ChainStatus,
+  type EventLog,
 } from "./api";
 
 interface UsePollingReturn<T> {
@@ -254,6 +256,14 @@ export function useChainStatus(network: NetworkId) {
     () => fetchChainStatus(network),
     10000,
     [network],
+  );
+}
+
+export function useEventLogs(network: NetworkId, address: string, enabled = true) {
+  return usePolling<EventLog[]>(
+    () => (enabled ? fetchEventLogs(network, address) : Promise.resolve([])),
+    30000,
+    [network, address, enabled],
   );
 }
 

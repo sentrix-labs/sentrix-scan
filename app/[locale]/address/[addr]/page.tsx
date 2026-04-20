@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { Wallet, ArrowDown, ArrowUp, ArrowLeftRight } from "lucide-react";
+import { Wallet, ArrowDown, ArrowUp, ArrowLeftRight, FileCode } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +15,7 @@ import { StatCard } from "@/components/common/StatCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { useNetwork } from "@/lib/network-context";
-import { useAddress, useAddressHistory, useAccountTokens } from "@/lib/hooks";
+import { useAddress, useAddressHistory, useAccountTokens, useEventLogs } from "@/lib/hooks";
 import { formatSRX, formatNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 
@@ -29,6 +29,7 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
   const { data: account, loading: accountLoading } = useAddress(network, addr);
   const { data: history, loading: historyLoading } = useAddressHistory(network, addr, page);
   const { data: tokens, loading: tokensLoading } = useAccountTokens(network, addr);
+  const { data: eventLogs, loading: eventLogsLoading } = useEventLogs(network, addr);
 
   const filtered = (history ?? []).filter((tx) => {
     if (dirFilter === "all") return true;
@@ -73,6 +74,7 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
         <TabsList>
           <TabsTrigger value="history">Transactions</TabsTrigger>
           <TabsTrigger value="tokens">Tokens</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
         </TabsList>
 
         <TabsContent value="history">
@@ -214,6 +216,53 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
                   icon={ArrowLeftRight}
                   title="No SRC-20 token holdings"
                   hint="This address doesn't hold any deployed SRC-20 tokens."
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card>
+            <CardContent className="p-0">
+              {eventLogsLoading && !eventLogs ? (
+                <div className="p-4 space-y-2">
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                </div>
+              ) : eventLogs && eventLogs.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
+                        <th className="px-4 py-2.5 font-medium">Block</th>
+                        <th className="px-4 py-2.5 font-medium">Tx</th>
+                        <th className="px-4 py-2.5 font-medium">Topic0</th>
+                        <th className="px-4 py-2.5 font-medium">Data</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60 row-hover">
+                      {eventLogs.map((l, i) => (
+                        <tr key={`${l.transactionHash}-${l.logIndex}-${i}`}>
+                          <td className="px-4 py-2.5 font-mono text-xs">#{l.blockNumber.toLocaleString()}</td>
+                          <td className="px-4 py-2.5">
+                            <TxHash hash={l.transactionHash} />
+                          </td>
+                          <td className="px-4 py-2.5 font-mono text-xs text-[var(--gold)]" title={l.topics[0]}>
+                            {l.topics[0] ? `${l.topics[0].slice(0, 10)}…${l.topics[0].slice(-4)}` : "—"}
+                          </td>
+                          <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground" title={l.data}>
+                            {l.data && l.data !== "0x" ? `${l.data.slice(0, 18)}…` : "0x"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={FileCode}
+                  title="No event logs"
+                  hint="EVM contracts emit events that are indexed here via eth_getLogs. Currently no logs for this address."
                 />
               )}
             </CardContent>

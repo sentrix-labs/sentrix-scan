@@ -542,6 +542,73 @@ export async function fetchChainStatus(network: NetworkId): Promise<ChainStatus 
   return apiFetch<ChainStatus>(network, "/sentrix_status");
 }
 
+// ── JSON-RPC: eth_getLogs for event history ─────────────────────────────────
+export interface EventLog {
+  address: string;
+  topics: string[];
+  data: string;
+  blockNumber: number;
+  blockHash: string;
+  transactionHash: string;
+  transactionIndex: number;
+  logIndex: number;
+  removed: boolean;
+}
+
+interface RawEventLog {
+  address: string;
+  topics: string[];
+  data: string;
+  blockNumber: string;
+  blockHash: string;
+  transactionHash: string;
+  transactionIndex: string;
+  logIndex: string;
+  removed?: boolean;
+}
+
+export async function fetchEventLogs(
+  network: NetworkId,
+  address: string,
+  fromBlock: number | "earliest" = "earliest",
+  toBlock: number | "latest" = "latest",
+): Promise<EventLog[]> {
+  const base = (network === "testnet"
+    ? (process.env.NEXT_PUBLIC_TESTNET_API || "https://testnet-api.sentriscloud.com")
+    : (process.env.NEXT_PUBLIC_MAINNET_API || "https://sentrix-api.sentriscloud.com"));
+  const fromHex = typeof fromBlock === "number" ? `0x${fromBlock.toString(16)}` : fromBlock;
+  const toHex = typeof toBlock === "number" ? `0x${toBlock.toString(16)}` : toBlock;
+  try {
+    const res = await fetch(`${base}/rpc`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "eth_getLogs",
+        params: [{ address, fromBlock: fromHex, toBlock: toHex }],
+        id: 1,
+      }),
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const body = await res.json();
+    if (body?.error) return [];
+    return (body?.result ?? []).map((l: RawEventLog) => ({
+      address: l.address,
+      topics: l.topics,
+      data: l.data,
+      blockNumber: parseInt(l.blockNumber, 16),
+      blockHash: l.blockHash,
+      transactionHash: l.transactionHash,
+      transactionIndex: parseInt(l.transactionIndex, 16),
+      logIndex: parseInt(l.logIndex, 16),
+      removed: l.removed ?? false,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // ── /accounts/top (real richlist with tx_count) ─────────────────────────────
 export async function fetchAccountsTop(network: NetworkId, limit = 100): Promise<TopHolder[]> {
   const res = await apiFetch<{
