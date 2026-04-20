@@ -100,6 +100,9 @@ export function Header() {
     { href: "/leaderboard/compare",         label: "Compare",   icon: GitCompare, color: "text-[var(--pink)]" },
   ] as const;
   const leaderboardActive = pathname.startsWith("/leaderboard");
+  // Home carries its own big editorial search in the hero — hide the header one there so the
+  // page doesn't read as having two competing search bars stacked on top of each other.
+  const isHome = pathname === "/";
 
   return (
     <header
@@ -170,23 +173,26 @@ export function Header() {
           </div>
         </nav>
 
-        {/* Search */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-md hidden lg:flex">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--tx-d)]" />
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder={t("search_placeholder")}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-12 text-[12px] bg-[color-mix(in_oklab,var(--foreground)_3%,transparent)] border border-[var(--brd)] rounded-full tracking-[.05em] placeholder:text-[var(--tx-d)] focus:outline-none focus:border-[var(--gold)] focus:bg-[color-mix(in_oklab,var(--gold)_4%,transparent)] transition-all"
-            />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[var(--tx-d)] border border-[var(--brd)] rounded px-1.5 py-0.5 hidden xl:inline-block">
-              ⌘K
-            </kbd>
-          </div>
-        </form>
+        {/* Search — hidden on home (hero owns the search) */}
+        {!isHome && (
+          <form onSubmit={handleSearch} className="flex-1 max-w-md hidden lg:flex">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--tx-d)]" />
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder={t("search_placeholder")}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full h-9 pl-9 pr-12 text-[12px] bg-[color-mix(in_oklab,var(--foreground)_3%,transparent)] border border-[var(--brd)] rounded-full tracking-[.05em] placeholder:text-[var(--tx-d)] focus:outline-none focus:border-[var(--gold)] focus:bg-[color-mix(in_oklab,var(--gold)_4%,transparent)] transition-all"
+              />
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[var(--tx-d)] border border-[var(--brd)] rounded px-1.5 py-0.5 hidden xl:inline-block">
+                ⌘K
+              </kbd>
+            </div>
+          </form>
+        )}
+        {isHome && <div className="flex-1 hidden lg:block" />}
 
         {/* Right controls */}
         <div className="flex items-center gap-2 ml-auto md:ml-0">
