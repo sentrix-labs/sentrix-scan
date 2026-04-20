@@ -227,6 +227,18 @@ html.dark ::selection {
 }
 .animate-pulse-live { animation: pulse-live 2s infinite; }
 
+/* Ticker marquee — seamless left-drift (two copies, 0 → -50% so copy #2 lands where #1 started) */
+@keyframes marquee-drift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee-drift 45s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}
+
 /* Smooth transitions between themes */
 html, body, .bg-card, .bg-background, .bg-muted,
 .text-foreground, .text-muted-foreground, .border-border {
