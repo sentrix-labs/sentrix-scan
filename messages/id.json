@@ -39,7 +39,8 @@
       "total_burned": "Total Dibakar",
       "tokens_deployed": "Token Tersebar",
       "block_reward": "Reward Blok",
-      "chain_id": "Chain ID"
+      "chain_id": "Chain ID",
+      "tps": "TPS Live"
     },
     "latest_blocks": "Blok Terbaru",
     "latest_transactions": "Transaksi Terbaru",

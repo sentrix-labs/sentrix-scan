@@ -76,6 +76,25 @@ export default function HomePage() {
     ? formatNumber(stats.total_transactions)
     : estimateTotalTransactions(stats?.total_blocks, blocks);
 
+  // Live TPS derived from the last ~30 seconds of polled blocks. Kept separate from the
+  // StatsChart because the chart is lazy-loaded and we want the headline number above the fold.
+  const liveTps = (() => {
+    if (!blocks || blocks.length === 0) return "—";
+    const now = Date.now();
+    const WINDOW_MS = 30_000;
+    let txs = 0;
+    let oldest = now;
+    for (const b of blocks) {
+      const ts = toMillis(b.timestamp);
+      if (now - ts > WINDOW_MS) continue;
+      txs += b.tx_count ?? b.transactions?.length ?? 0;
+      if (ts < oldest) oldest = ts;
+    }
+    const spanSec = Math.max(1, (now - oldest) / 1000);
+    const tps = txs / spanSec;
+    return `${tps.toFixed(2)} tps`;
+  })();
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const q = query.trim();
@@ -136,8 +155,8 @@ export default function HomePage() {
           Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
+            <StatCard label={t("stats.tps")} value={liveTps} loading={!blocks} accent="var(--gold)" />
             <StatCard label={t("stats.total_transactions")} value={totalTxValue} loading={statsLoading && !blocks} accent="var(--blue)" />
-            <StatCard label={t("stats.total_minted")} value={stats ? formatSRX(stats.total_minted_srx) : "—"} loading={statsLoading} accent="var(--green)" />
             <StatCard label={t("stats.total_burned")} value={stats ? `${stats.total_burned_srx.toFixed(4)} SRX` : "—"} loading={statsLoading} accent="var(--red)" />
             <StatCard label={t("stats.active_validators")} value={stats ? String(stats.active_validators) : "—"} loading={statsLoading} accent="var(--purple)" />
           </>

@@ -39,7 +39,8 @@
       "total_burned": "Total Burned",
       "tokens_deployed": "Tokens Deployed",
       "block_reward": "Block Reward",
-      "chain_id": "Chain ID"
+      "chain_id": "Chain ID",
+      "tps": "Live TPS"
     },
     "latest_blocks": "Latest Blocks",
     "latest_transactions": "Latest Transactions",
