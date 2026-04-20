@@ -16,7 +16,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNetwork } from "@/lib/network-context";
-import { useValidators, useBlocks } from "@/lib/hooks";
+import { useValidators, useBlocks, useValidatorRewards, useValidatorBlocksOverTime, useValidatorDelegators } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
 
 // DECISION: lazy-load Recharts to keep initial bundle below 500 kB gzipped target.
@@ -39,6 +39,10 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
   const { data: validators, loading } = useValidators(network);
   const { data: recentBlocks } = useBlocks(network, 100);
   const [blockPage, setBlockPage] = useState(1);
+  const [rewardsPage, setRewardsPage] = useState(1);
+  const { data: rewardsData, loading: rewardsLoading } = useValidatorRewards(network, address, rewardsPage);
+  const { data: blocksOverTime } = useValidatorBlocksOverTime(network, address, "1h");
+  const { data: delegatorsData, loading: delegatorsLoading } = useValidatorDelegators(network, address);
 
   const validator = useMemo(
     () => validators?.find((v) => v.address.toLowerCase() === address.toLowerCase()) ?? null,
@@ -53,17 +57,16 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
   const pagedBlocks = producedBlocks.slice((blockPage - 1) * PAGE_SIZE, blockPage * PAGE_SIZE);
   const totalBlockPages = Math.max(1, Math.ceil(producedBlocks.length / PAGE_SIZE));
 
-  // Build chart series from recent blocks grouped by hour.
-  // TODO(api): needs GET /validators/{address}/blocks-over-time — using recent blocks for now
+  // Backend /validators/{addr}/blocks-over-time returns real time-series buckets.
   const chartData = useMemo(() => {
-    const buckets: Record<string, number> = {};
-    producedBlocks.forEach((b) => {
-      const d = new Date(b.timestamp);
-      const key = `${d.getUTCHours()}:00`;
-      buckets[key] = (buckets[key] || 0) + 1;
+    if (!blocksOverTime || blocksOverTime.length === 0) return [];
+    return blocksOverTime.map((p) => {
+      const d = new Date(p.timestamp * 1000);
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return { hour: `${hh}:${mm}`, count: p.count };
     });
-    return Object.entries(buckets).map(([hour, count]) => ({ hour, count }));
-  }, [producedBlocks]);
+  }, [blocksOverTime]);
 
   if (loading && !validators) {
     return (
@@ -216,12 +219,38 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
         <TabsContent value="delegators">
           <Card>
             <CardContent className="p-0">
-              {/* TODO(api): needs GET /validators/{address}/delegators */}
-              <EmptyState
-                icon={Users}
-                title="Delegator list not yet available"
-                hint="Endpoint /validators/{address}/delegators pending on the Sentrix Chain API."
-              />
+              {delegatorsLoading && !delegatorsData ? (
+                <div className="p-4 space-y-2">
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                </div>
+              ) : delegatorsData && delegatorsData.delegators.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
+                        <th className="px-4 py-2.5 font-medium w-10">#</th>
+                        <th className="px-4 py-2.5 font-medium">Delegator</th>
+                        <th className="px-4 py-2.5 font-medium text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60 row-hover">
+                      {delegatorsData.delegators.map((d, i) => (
+                        <tr key={d.address}>
+                          <td className="px-4 py-2.5 text-muted-foreground">{i + 1}</td>
+                          <td className="px-4 py-2.5"><Address address={d.address} /></td>
+                          <td className="px-4 py-2.5 text-right font-mono">{formatNumber(d.amount_srx)} SRX</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No delegators"
+                  hint="Delegation will become active after the Voyager DPoS upgrade."
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -229,12 +258,61 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
         <TabsContent value="rewards">
           <Card>
             <CardContent className="p-0">
-              {/* TODO(api): needs GET /validators/{address}/rewards */}
-              <EmptyState
-                icon={Users}
-                title="Rewards history not yet available"
-                hint={`Total earned: ${validator.rewards_earned !== undefined ? `${formatNumber(validator.rewards_earned)} SRX` : "—"}`}
-              />
+              {rewardsLoading && !rewardsData ? (
+                <div className="p-4 space-y-2">
+                  {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                </div>
+              ) : rewardsData && rewardsData.rewards.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
+                          <th className="px-4 py-2.5 font-medium">Block</th>
+                          <th className="px-4 py-2.5 font-medium">Age</th>
+                          <th className="px-4 py-2.5 font-medium text-right">Reward</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60 row-hover">
+                        {rewardsData.rewards.map((r) => (
+                          <tr key={`${r.block_height}-${r.timestamp}`}>
+                            <td className="px-4 py-2.5"><BlockHeight height={r.block_height} /></td>
+                            <td className="px-4 py-2.5 text-muted-foreground text-xs"><Timestamp timestamp={r.timestamp} /></td>
+                            <td className="px-4 py-2.5 text-right font-mono text-[var(--green)]">+{r.amount.toFixed(2)} SRX</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {(rewardsData.hasMore || rewardsPage > 1) && (
+                    <div className="border-t border-border flex items-center justify-between px-4 py-2 text-xs text-muted-foreground">
+                      <span>Page {rewardsPage}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setRewardsPage(Math.max(1, rewardsPage - 1))}
+                          disabled={rewardsPage === 1}
+                          className="px-2 py-1 rounded border border-border hover:bg-muted disabled:opacity-40"
+                        >
+                          Prev
+                        </button>
+                        <button
+                          onClick={() => setRewardsPage(rewardsPage + 1)}
+                          disabled={!rewardsData.hasMore}
+                          className="px-2 py-1 rounded border border-border hover:bg-muted disabled:opacity-40"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No rewards recorded yet"
+                  hint="Rewards land on every block this validator produces."
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>

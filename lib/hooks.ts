@@ -9,10 +9,14 @@ import {
   fetchAccountHistory, fetchValidators, fetchTokens,
   fetchRichlist, fetchTokenHolders, fetchTokenTrades,
   fetchChainPerformance,
+  fetchAccountTokens, fetchValidatorRewards, fetchValidatorBlocksOverTime,
+  fetchValidatorDelegators, fetchMempool, fetchCurrentEpoch, fetchChainStatus,
   type ChainInfo, type BlockData, type TransactionData,
   type ValidatorData, type AccountBalance, type TokenData,
   type TopHolder, type TokenHolder, type TokenTransfer,
   type ChainPerformance,
+  type AccountTokenHolding, type ValidatorReward, type ValidatorBlocksPoint,
+  type ValidatorDelegator, type MempoolSnapshot, type EpochInfo, type ChainStatus,
 } from "./api";
 
 interface UsePollingReturn<T> {
@@ -194,6 +198,62 @@ export function useChainPerformance(network: NetworkId, range: "1m" | "5m" | "15
     () => fetchChainPerformance(network, range),
     5000,
     [network, range],
+  );
+}
+
+export function useAccountTokens(network: NetworkId, address: string) {
+  return usePolling<AccountTokenHolding[]>(
+    () => fetchAccountTokens(network, address),
+    30000,
+    [network, address],
+  );
+}
+
+export function useValidatorRewards(network: NetworkId, address: string, page = 1) {
+  return usePolling<{ rewards: ValidatorReward[]; hasMore: boolean }>(
+    () => fetchValidatorRewards(network, address, page),
+    15000,
+    [network, address, page],
+  );
+}
+
+export function useValidatorBlocksOverTime(network: NetworkId, address: string, range: "1h" | "24h" | "7d" = "1h") {
+  return usePolling<ValidatorBlocksPoint[]>(
+    () => fetchValidatorBlocksOverTime(network, address, range),
+    15000,
+    [network, address, range],
+  );
+}
+
+export function useValidatorDelegators(network: NetworkId, address: string) {
+  return usePolling<{ delegators: ValidatorDelegator[]; total: number; total_srx: number }>(
+    () => fetchValidatorDelegators(network, address),
+    30000,
+    [network, address],
+  );
+}
+
+export function useMempool(network: NetworkId) {
+  return usePolling<MempoolSnapshot>(
+    () => fetchMempool(network),
+    5000,
+    [network],
+  );
+}
+
+export function useCurrentEpoch(network: NetworkId) {
+  return usePolling<EpochInfo>(
+    () => fetchCurrentEpoch(network),
+    30000,
+    [network],
+  );
+}
+
+export function useChainStatus(network: NetworkId) {
+  return usePolling<ChainStatus>(
+    () => fetchChainStatus(network),
+    10000,
+    [network],
   );
 }
 

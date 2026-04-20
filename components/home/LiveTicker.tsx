@@ -1,28 +1,44 @@
 "use client";
 
-import type { ChainInfo } from "@/lib/api";
+import type { ChainInfo, EpochInfo, ChainStatus } from "@/lib/api";
 import { formatNumber, formatSRX } from "@/lib/format";
 
 interface LiveTickerProps {
   stats: ChainInfo | null;
   blockTime: string;
   network: "mainnet" | "testnet";
+  epoch?: EpochInfo | null;
+  status?: ChainStatus | null;
+}
+
+function formatUptime(seconds: number): string {
+  if (seconds < 60) return `${Math.floor(seconds)}s`;
+  const m = seconds / 60;
+  if (m < 60) return `${Math.floor(m)}m`;
+  const h = m / 60;
+  if (h < 24) return `${h.toFixed(1)}h`;
+  return `${(h / 24).toFixed(1)}d`;
 }
 
 // DECISION: Etherscan/Solscan keep a thin "live" strip above the hero showing the numbers
 // that matter most — block height, tx pulse, gas/block time. One horizontal scroll-safe
 // rail of mono key/value pairs. Draws the eye before the big serif title.
-export function LiveTicker({ stats, blockTime, network }: LiveTickerProps) {
+export function LiveTicker({ stats, blockTime, network, epoch, status }: LiveTickerProps) {
+  const epochProgress = epoch && epoch.end_height > epoch.start_height && stats
+    ? Math.min(100, Math.max(0, ((stats.height - epoch.start_height) / (epoch.end_height - epoch.start_height)) * 100))
+    : null;
+
   const items = [
     { label: "Chain", value: network === "mainnet" ? "MAINNET" : "TESTNET", color: network === "mainnet" ? "text-[var(--green)]" : "text-[var(--orange)]" },
     { label: "Block", value: stats ? `#${stats.height.toLocaleString()}` : "—" },
     { label: "Block Time", value: blockTime },
+    { label: "Epoch", value: epoch ? `${epoch.epoch_number}${epochProgress !== null ? ` · ${epochProgress.toFixed(0)}%` : ""}` : "—" },
     { label: "Validators", value: stats ? String(stats.active_validators) : "—" },
     { label: "Mempool", value: stats ? `${stats.mempool_size} tx` : "—" },
     { label: "Circulating", value: stats ? formatSRX(stats.total_minted_srx) : "—" },
     { label: "Tokens", value: stats ? String(stats.deployed_tokens) : "—" },
     { label: "Reward", value: stats ? `${stats.next_block_reward_srx} SRX` : "—" },
-    { label: "Supply Cap", value: stats ? formatNumber(210_000_000) : "—" },
+    { label: "Uptime", value: status ? formatUptime(status.uptime_seconds) : "—" },
   ];
 
   return (

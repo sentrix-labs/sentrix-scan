@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Link } from "@/i18n/navigation";
-import { Blocks, ArrowUpDown, Search } from "lucide-react";
+import { Blocks, ArrowUpDown, Search, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCardSkeleton } from "@/components/common/skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +23,7 @@ const StatsChart = dynamic(() => import("@/components/home/StatsChart").then((m)
   ssr: false,
   loading: () => <Skeleton className="h-72 w-full" />,
 });
-import { useStats, useBlocks, useTransactions, useChainPerformance } from "@/lib/hooks";
+import { useStats, useBlocks, useTransactions, useChainPerformance, useMempool, useCurrentEpoch, useChainStatus } from "@/lib/hooks";
 import { formatNumber, formatSRX, toMillis } from "@/lib/format";
 import { detectSearchType } from "@/lib/format";
 import type { ChainPerformance } from "@/lib/api";
@@ -76,6 +76,9 @@ export default function HomePage() {
   // DECISION: backend /chain/performance now feeds both the Live TPS card and the StatsChart.
   // Replaces the previous client-bucketed estimate — real tps/block_time from the validator.
   const { data: performance, loading: perfLoading } = useChainPerformance(network, perfRange);
+  const { data: mempool } = useMempool(network);
+  const { data: epoch } = useCurrentEpoch(network);
+  const { data: chainStatus } = useChainStatus(network);
 
   // Prefer backend block_time_sec; fall back to deriving from polled block timestamps.
   const latestPerf = performance?.points?.[performance.points.length - 1];
@@ -101,7 +104,7 @@ export default function HomePage() {
 
   return (
     <>
-      <LiveTicker stats={stats} blockTime={blockTime} network={network} />
+      <LiveTicker stats={stats} blockTime={blockTime} network={network} epoch={epoch} status={chainStatus} />
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-10 lg:py-16 space-y-12 animate-fade-in">
       {/* Editorial hero */}
       <div className="text-center space-y-6 max-w-3xl mx-auto">
@@ -167,6 +170,26 @@ export default function HomePage() {
         onRangeChange={setPerfRange}
         loading={perfLoading}
       />
+
+      {/* Mempool — one-line pulse card, matches the editorial rhythm without stealing the eye */}
+      <Card>
+        <CardContent className="px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className={`w-2 h-2 rounded-full shrink-0 ${mempool && mempool.size > 0 ? "bg-[var(--orange)] animate-pulse-live" : "bg-[var(--green)]"}`} />
+            <Clock className="h-4 w-4 text-[var(--tx-d)] shrink-0" />
+            <span className="font-mono text-[10px] tracking-[.22em] uppercase text-[var(--tx-d)] shrink-0">Mempool</span>
+            <span className="font-serif text-lg leading-none">
+              {mempool ? mempool.size : "—"}
+            </span>
+            <span className="font-mono text-[11px] text-[var(--tx-m)]">
+              {mempool && mempool.size === 1 ? "pending tx" : "pending txs"}
+            </span>
+          </div>
+          <span className="font-mono text-[10px] text-[var(--tx-d)] tracking-[.12em] uppercase">
+            {mempool && mempool.size === 0 ? "clear" : "awaiting inclusion"}
+          </span>
+        </CardContent>
+      </Card>
 
       {/* Latest blocks + transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

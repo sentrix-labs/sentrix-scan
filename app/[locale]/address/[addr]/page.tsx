@@ -15,8 +15,9 @@ import { StatCard } from "@/components/common/StatCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { useNetwork } from "@/lib/network-context";
-import { useAddress, useAddressHistory } from "@/lib/hooks";
+import { useAddress, useAddressHistory, useAccountTokens } from "@/lib/hooks";
 import { formatSRX, formatNumber } from "@/lib/format";
+import { Link } from "@/i18n/navigation";
 
 type DirFilter = "all" | "in" | "out";
 
@@ -27,6 +28,7 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
   const [dirFilter, setDirFilter] = useState<DirFilter>("all");
   const { data: account, loading: accountLoading } = useAddress(network, addr);
   const { data: history, loading: historyLoading } = useAddressHistory(network, addr, page);
+  const { data: tokens, loading: tokensLoading } = useAccountTokens(network, addr);
 
   const filtered = (history ?? []).filter((tx) => {
     if (dirFilter === "all") return true;
@@ -169,12 +171,51 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
         <TabsContent value="tokens">
           <Card>
             <CardContent className="p-0">
-              {/* TODO(api): needs GET /accounts/{address}/tokens — using placeholder */}
-              <EmptyState
-                icon={ArrowLeftRight}
-                title="No SRC-20 token holdings found"
-                hint="Token balance tracking is being wired up on the backend."
-              />
+              {tokensLoading && !tokens ? (
+                <div className="p-4 space-y-2">
+                  {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+                </div>
+              ) : tokens && tokens.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border text-left text-xs text-muted-foreground bg-muted/30">
+                        <th className="px-4 py-2.5 font-medium">Token</th>
+                        <th className="px-4 py-2.5 font-medium">Contract</th>
+                        <th className="px-4 py-2.5 font-medium text-right">Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60 row-hover">
+                      {tokens.map((tk) => (
+                        <tr key={tk.contract_address}>
+                          <td className="px-4 py-2.5">
+                            <Link href={`/tokens/${tk.contract_address}`} className="inline-flex items-center gap-2 hover:underline">
+                              <span className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--gold)] to-[var(--gold-d)] flex items-center justify-center text-white text-[11px] font-semibold shrink-0">
+                                {tk.symbol.slice(0, 2).toUpperCase() || "??"}
+                              </span>
+                              <span className="flex flex-col">
+                                <span className="font-medium text-sm text-primary">{tk.name || tk.symbol}</span>
+                                <span className="text-muted-foreground text-xs">{tk.symbol}</span>
+                              </span>
+                            </Link>
+                          </td>
+                          <td className="px-4 py-2.5"><Address address={tk.contract_address} muted /></td>
+                          <td className="px-4 py-2.5 text-right font-mono">
+                            {(tk.balance / Math.pow(10, tk.decimals)).toLocaleString(undefined, { maximumFractionDigits: 4 })}{" "}
+                            <span className="text-muted-foreground">{tk.symbol}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={ArrowLeftRight}
+                  title="No SRC-20 token holdings"
+                  hint="This address doesn't hold any deployed SRC-20 tokens."
+                />
+              )}
             </CardContent>
           </Card>
         </TabsContent>

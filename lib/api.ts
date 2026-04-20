@@ -114,6 +114,8 @@ export interface TopHolder {
   address: string;
   balance: number;
   share: number;
+  label?: string;
+  tx_count?: number;
 }
 
 export interface TokenHolder {
@@ -388,4 +390,170 @@ export async function fetchChainPerformance(
   range: "1m" | "5m" | "15m" | "1h" | "24h" = "1h",
 ): Promise<ChainPerformance | null> {
   return apiFetch<ChainPerformance>(network, `/chain/performance?range=${range}`);
+}
+
+// ── /accounts/{addr}/tokens — SRC-20 holdings ───────────────────────────────
+export interface AccountTokenHolding {
+  contract_address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  balance: number;
+}
+
+interface RawAccountTokenHolding {
+  contract_address: string;
+  contract?: string;
+  symbol?: string;
+  name?: string;
+  decimals?: number;
+  balance?: number;
+  balance_raw?: number;
+}
+
+export async function fetchAccountTokens(network: NetworkId, address: string): Promise<AccountTokenHolding[]> {
+  const res = await apiFetch<{ tokens: RawAccountTokenHolding[] }>(network, `/accounts/${address}/tokens`);
+  if (!res?.tokens) return [];
+  return res.tokens.map((t) => ({
+    contract_address: t.contract_address ?? t.contract ?? "",
+    symbol: t.symbol ?? "",
+    name: t.name ?? "",
+    decimals: t.decimals ?? 0,
+    balance: t.balance ?? t.balance_raw ?? 0,
+  }));
+}
+
+// ── /validators/{addr}/rewards ──────────────────────────────────────────────
+export interface ValidatorReward {
+  block_height: number;
+  timestamp: number;
+  amount: number;
+}
+
+export async function fetchValidatorRewards(
+  network: NetworkId,
+  address: string,
+  page = 1,
+  limit = 20,
+): Promise<{ rewards: ValidatorReward[]; hasMore: boolean }> {
+  const res = await apiFetch<{ rewards: ValidatorReward[]; pagination?: { has_more?: boolean } }>(
+    network,
+    `/validators/${address}/rewards?page=${page}&limit=${limit}`,
+  );
+  return { rewards: res?.rewards ?? [], hasMore: res?.pagination?.has_more ?? false };
+}
+
+// ── /validators/{addr}/blocks-over-time ─────────────────────────────────────
+export interface ValidatorBlocksPoint {
+  timestamp: number;
+  count: number;
+}
+
+export async function fetchValidatorBlocksOverTime(
+  network: NetworkId,
+  address: string,
+  range: "1h" | "24h" | "7d" = "1h",
+): Promise<ValidatorBlocksPoint[]> {
+  const res = await apiFetch<{ points: ValidatorBlocksPoint[] }>(
+    network,
+    `/validators/${address}/blocks-over-time?range=${range}`,
+  );
+  return res?.points ?? [];
+}
+
+// ── /validators/{addr}/delegators (DPoS) ────────────────────────────────────
+export interface ValidatorDelegator {
+  address: string;
+  amount_srx: number;
+  shares?: number;
+}
+
+export async function fetchValidatorDelegators(
+  network: NetworkId,
+  address: string,
+): Promise<{ delegators: ValidatorDelegator[]; total: number; total_srx: number }> {
+  const res = await apiFetch<{
+    delegators: Array<{ address: string; amount_sentri?: number; amount_srx?: number; shares?: number }>;
+    total?: number;
+    total_delegated_srx?: number;
+  }>(network, `/validators/${address}/delegators`);
+  if (!res) return { delegators: [], total: 0, total_srx: 0 };
+  return {
+    delegators: (res.delegators ?? []).map((d) => ({
+      address: d.address,
+      amount_srx: d.amount_srx ?? (d.amount_sentri ? toSrx(d.amount_sentri) : 0),
+      shares: d.shares,
+    })),
+    total: res.total ?? 0,
+    total_srx: res.total_delegated_srx ?? 0,
+  };
+}
+
+// ── /mempool ─────────────────────────────────────────────────────────────────
+export interface MempoolSnapshot {
+  size: number;
+  transactions: Array<{
+    txid?: string;
+    from_address?: string;
+    to_address?: string;
+    amount?: number;
+    fee?: number;
+    timestamp?: number;
+  }>;
+}
+
+export async function fetchMempool(network: NetworkId): Promise<MempoolSnapshot> {
+  const res = await apiFetch<MempoolSnapshot>(network, "/mempool");
+  return res ?? { size: 0, transactions: [] };
+}
+
+// ── /epoch/current ──────────────────────────────────────────────────────────
+export interface EpochInfo {
+  epoch_number: number;
+  start_height: number;
+  end_height: number;
+  total_blocks_produced: number;
+  total_rewards: number;
+  total_staked: number;
+}
+
+export async function fetchCurrentEpoch(network: NetworkId): Promise<EpochInfo | null> {
+  return apiFetch<EpochInfo>(network, "/epoch/current");
+}
+
+// ── /sentrix_status ─────────────────────────────────────────────────────────
+export interface ChainStatus {
+  chain_id: number;
+  consensus: "PoA" | "BFT" | "DPoS" | string;
+  native_token: string;
+  uptime_seconds: number;
+  version: { version: string; build: string };
+  sync_info: {
+    earliest_block_height: number;
+    latest_block_height: number;
+    latest_block_hash: string;
+    latest_block_time: number;
+    syncing: boolean;
+  };
+  validators: { active_count: number };
+}
+
+export async function fetchChainStatus(network: NetworkId): Promise<ChainStatus | null> {
+  return apiFetch<ChainStatus>(network, "/sentrix_status");
+}
+
+// ── /accounts/top (real richlist with tx_count) ─────────────────────────────
+export async function fetchAccountsTop(network: NetworkId, limit = 100): Promise<TopHolder[]> {
+  const res = await apiFetch<{
+    accounts: Array<{ address: string; balance_srx: number; percentage: number; tx_count?: number; name?: string | null }>;
+  }>(network, `/accounts/top?limit=${limit}`);
+  if (!res?.accounts) return [];
+  return res.accounts.map((a, i) => ({
+    rank: i + 1,
+    address: a.address,
+    balance: a.balance_srx ?? 0,
+    share: a.percentage ?? 0,
+    label: a.name ?? undefined,
+    tx_count: a.tx_count,
+  }));
 }
