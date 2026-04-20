@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NetworkProvider } from "@/lib/network-context";
+import { LabelBootstrap } from "@/components/layout/label-bootstrap";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/layout/toaster";
@@ -30,10 +31,12 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <ThemeProvider>
             <NetworkProvider>
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-              <Toaster />
+              <LabelBootstrap>
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+                <Toaster />
+              </LabelBootstrap>
             </NetworkProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

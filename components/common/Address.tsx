@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { Copyable } from "./Copyable";
 import { shortenAddress } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useAddressLabel, toneForKind } from "@/lib/labels";
 
 interface AddressProps {
   address: string;
@@ -12,10 +13,12 @@ interface AddressProps {
   link?: boolean;
   showCopy?: boolean;
   className?: string;
-  /** Show label instead of address (e.g. validator name) while keeping address behavior */
+  /** Explicit label override (takes priority over the global registry). */
   label?: string;
   /** Make text muted (for secondary contexts like table cells) */
   muted?: boolean;
+  /** Hide the inline label tag even if the registry has one (e.g., detail page headers). */
+  hideTag?: boolean;
 }
 
 // DECISION: hover highlight uses data-address + DOM query pattern (Solana Explorer inspired)
@@ -28,9 +31,12 @@ export function Address({
   className,
   label,
   muted = false,
+  hideTag = false,
 }: AddressProps) {
   const ref = useRef<HTMLSpanElement>(null);
+  const registryLabel = useAddressLabel(address);
   const display = label ?? (truncate ? shortenAddress(address) : address);
+  const tag = !hideTag && !label && registryLabel ? registryLabel : null;
 
   useEffect(() => {
     const el = ref.current;
@@ -82,12 +88,32 @@ export function Address({
     </span>
   );
 
-  if (!showCopy) return content;
+  const tagNode = tag ? (
+    (() => {
+      const tone = toneForKind(tag.kind);
+      return (
+        <span
+          className={cn(
+            "inline-flex items-center text-[10px] font-mono uppercase tracking-[.1em] rounded-md px-1.5 py-0.5 border",
+            tone.bg,
+            tone.fg,
+            tone.border,
+          )}
+          title={`${tag.kind}: ${tag.name}`}
+        >
+          {tag.name}
+        </span>
+      );
+    })()
+  ) : null;
+
+  if (!showCopy && !tagNode) return content;
 
   return (
-    <span className="inline-flex items-center gap-1 min-w-0">
+    <span className="inline-flex items-center gap-1.5 min-w-0">
       {content}
-      <Copyable text={address} bare />
+      {tagNode}
+      {showCopy && <Copyable text={address} bare />}
     </span>
   );
 }
