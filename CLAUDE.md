@@ -111,3 +111,6 @@ Summary + screenshot + decisions + TODOs.
 - Use `animate-bounce` or scale hovers
 - Skip discovery step "because task is simple"
 - Commit without visual verification
+- Push branches matching `local/*` to origin — they are local-only
+  scratch branches (e.g., `local/session-off-YYYY-MM-DD`). Only push
+  `master` unless the user explicitly asks otherwise.
