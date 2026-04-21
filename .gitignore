@@ -51,3 +51,12 @@ next-env.d.ts
 /ROADMAP.local.md
 /local-*.md
 /CLAUDE.md
+# session handoff / working notes between Claude Code sessions
+/SESSION.md
+/HANDOFF.md
+/SESSION_*.md
+/HANDOFF_*.md
+/*.handoff.md
+/*.session.md
+/.session/
+/.handoff/
