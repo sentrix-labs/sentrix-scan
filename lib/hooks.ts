@@ -80,7 +80,12 @@ function usePolling<T>(
     setData(null);
     setStatus(FetchStatus.Fetching);
     failures.current = 0;
-    refetch();
+    // DECISION: stagger initial fetches with a small random jitter (0-400ms). Home mounts
+    // ~10 polling hooks at once; without jitter they all hit the backend within <50ms and
+    // blow past the rate limit. Jitter spreads the burst across 400ms so each request falls
+    // inside its own rate bucket — no more 429/CORS flash on page load.
+    const initialJitter = Math.floor(Math.random() * 400);
+    const jitterTimer = setTimeout(() => { refetch(); }, initialJitter);
     if (interval > 0) {
       function schedule() {
         const backoff = Math.min(60_000, interval * Math.pow(2, failures.current));
@@ -91,9 +96,13 @@ function usePolling<T>(
       }
       schedule();
       return () => {
+        clearTimeout(jitterTimer);
         if (timerRef.current) clearTimeout(timerRef.current);
       };
     }
+    return () => {
+      clearTimeout(jitterTimer);
+    };
   }, [refetch, interval]);
 
   return {

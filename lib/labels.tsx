@@ -43,13 +43,17 @@ export function LabelProvider({ network, children }: { network: NetworkId; child
     setMap(new Map());
 
     async function load() {
-      // Fire in parallel — all three are cheap GETs and the registry doesn't need them to
-      // block each other.
-      const [validators, top, tokens] = await Promise.all([
-        fetchValidators(network),
-        fetchAccountsTop(network, 50),
-        fetchTokens(network),
-      ]);
+      // DECISION: load sequentially with a small gap between calls. Previously used
+      // Promise.all which added 3 concurrent requests on top of the ~10 polling hooks that
+      // also mount on first paint, blowing past the backend's rate-limit and triggering a
+      // cascade of 429/CORS errors in the console. Sequential reads keep the registry fresh
+      // without competing with real-time hooks.
+      const gap = () => new Promise((r) => setTimeout(r, 200));
+      const validators = await fetchValidators(network);
+      await gap();
+      const top = await fetchAccountsTop(network, 50);
+      await gap();
+      const tokens = await fetchTokens(network);
 
       const entries: Array<[string, LabelEntry]> = [];
 
