@@ -5,6 +5,7 @@
     "validators": "Validator",
     "tokens": "Token",
     "leaderboard": "Leaderboard",
+    "analytics": "Analitik",
     "search_placeholder": "Cari berdasarkan blok / tx / alamat..."
   },
   "leaderboard": {

@@ -16,8 +16,9 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNetwork } from "@/lib/network-context";
-import { useValidators, useBlocks, useValidatorRewards, useValidatorBlocksOverTime, useValidatorDelegators } from "@/lib/hooks";
+import { useValidators, useBlocks, useValidatorRewards, useValidatorBlocksOverTime, useValidatorDelegators, useStats } from "@/lib/hooks";
 import { formatNumber } from "@/lib/format";
+import { Calculator } from "lucide-react";
 
 // DECISION: lazy-load Recharts to keep initial bundle below 500 kB gzipped target.
 const ValidatorChart = dynamic(() => import("./chart").then((m) => m.ValidatorChart), {
@@ -37,6 +38,7 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
   const { address } = use(params);
   const { network } = useNetwork();
   const { data: validators, loading } = useValidators(network);
+  const { data: stats } = useStats(network);
   const { data: recentBlocks } = useBlocks(network, 100);
   const [blockPage, setBlockPage] = useState(1);
   const [rewardsPage, setRewardsPage] = useState(1);
@@ -164,6 +166,7 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
           <TabsTrigger value="blocks">Produced Blocks</TabsTrigger>
           <TabsTrigger value="delegators">Delegators</TabsTrigger>
           <TabsTrigger value="rewards">Rewards</TabsTrigger>
+          <TabsTrigger value="calculator">Calculator</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -339,7 +342,102 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="calculator">
+          <RewardsCalculator
+            blockRewardSrx={stats?.next_block_reward_srx ?? 1}
+            blocksProduced={validator.blocks_produced ?? 0}
+            totalBlocks={stats?.total_blocks ?? 1}
+            commission={validator.commission ?? 0}
+          />
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function RewardsCalculator({ blockRewardSrx, blocksProduced, totalBlocks, commission }: {
+  blockRewardSrx: number;
+  blocksProduced: number;
+  totalBlocks: number;
+  commission: number;
+}) {
+  const [stake, setStake] = useState(1000);
+
+  // Validator's share of blocks produced (what fraction of total chain blocks came from them).
+  const validatorShare = totalBlocks > 0 ? blocksProduced / totalBlocks : 0;
+
+  // Assume ~1 block/sec target rate. Total SRX minted per day = 86400 × block_reward.
+  const dailyChainMint = 86400 * blockRewardSrx;
+
+  // Validator's daily revenue (before commission) proportional to share.
+  const dailyValidatorRevenue = dailyChainMint * validatorShare;
+
+  // After commission: delegator share = (1 - commission) × their pro-rata of the pool.
+  // For a PoA chain without DPoS, stake has no yield — show a clear notice and keep the
+  // calculator visible for post-Voyager preview.
+  const delegatorShare = (1 - commission / 100);
+
+  // We don't know the delegator pool size here; assume user is a sole delegator for a rough
+  // upper-bound ("what if I delegate X SRX today"). Realistically this is diluted by others.
+  const estDaily = dailyValidatorRevenue * delegatorShare;
+  const estMonthly = estDaily * 30;
+  const estYearly = estDaily * 365;
+
+  // Rough APR ignoring other delegators — upper bound.
+  const apr = stake > 0 ? (estYearly / stake) * 100 : 0;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="eyebrow flex items-center gap-2">
+          <Calculator className="h-3.5 w-3.5 text-[var(--gold)]" />
+          Staking Rewards Calculator
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-6 py-4 space-y-5">
+        <p className="text-xs text-muted-foreground">
+          Rough estimate assuming you are the sole delegator and this validator keeps the same block-producing
+          pace. Real earnings scale down as more delegators share the same pool. Post-Voyager DPoS will replace
+          these heuristics with on-chain delegation data.
+        </p>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="text-sm font-medium">Delegate</label>
+          <input
+            type="number"
+            value={stake}
+            onChange={(e) => setStake(Math.max(0, Number(e.target.value) || 0))}
+            min={0}
+            step={100}
+            className="w-40 h-9 px-3 rounded-md border border-border bg-muted/30 text-sm font-mono tabular-nums focus:outline-none focus:border-[var(--gold)]"
+          />
+          <span className="text-sm text-muted-foreground font-mono">SRX</span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <EstCard label="Daily" value={`${estDaily.toFixed(4)} SRX`} />
+          <EstCard label="Monthly" value={`${estMonthly.toFixed(2)} SRX`} />
+          <EstCard label="Yearly" value={`${estYearly.toFixed(2)} SRX`} />
+          <EstCard label="APR" value={`${apr.toFixed(2)}%`} accent />
+        </div>
+
+        <div className="text-xs text-muted-foreground font-mono border-t border-border/60 pt-3 grid grid-cols-2 gap-2">
+          <span>Block reward: <span className="text-foreground">{blockRewardSrx} SRX</span></span>
+          <span>Commission: <span className="text-foreground">{commission}%</span></span>
+          <span>Validator share: <span className="text-foreground">{(validatorShare * 100).toFixed(2)}%</span></span>
+          <span>Chain mint / day: <span className="text-foreground">{formatNumber(Math.round(dailyChainMint))} SRX</span></span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EstCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className={`rounded-lg border p-3 ${accent ? "bg-[var(--gold)]/5 border-[var(--gold)]/30" : "bg-muted/30 border-border"}`}>
+      <div className="eyebrow mb-1">{label}</div>
+      <div className={`font-serif text-xl ${accent ? "text-[var(--gold)]" : ""}`}>{value}</div>
     </div>
   );
 }

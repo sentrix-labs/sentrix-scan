@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from "react";
 import {
   Search, Sun, Moon, Menu, X, Globe, Check, ChevronDown,
   Users, Coins, Shield, FileCode, Fish, GitCompare,
+  Home as HomeIcon, Blocks as BlocksIcon, BarChart3,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useNetwork } from "@/lib/network-context";
@@ -42,16 +43,69 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ⌘K / Ctrl-K focuses search
+  // Keyboard shortcuts:
+  //   ⌘K / Ctrl-K  → focus search
+  //   /             → focus search (dev-tool convention)
+  //   g h           → home      (vim-style leader)
+  //   g b           → blocks
+  //   g v           → validators
+  //   g t           → tokens
+  //   g l           → leaderboard
+  // We ignore shortcuts when typing into an input/textarea so normal typing still works.
   useEffect(() => {
+    let leader = false;
+    let leaderTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function isTyping(t: EventTarget | null) {
+      const el = t as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName?.toLowerCase();
+      return tag === "input" || tag === "textarea" || el.isContentEditable;
+    }
+
+    function focusSearch() {
+      searchRef.current?.focus();
+    }
+
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        searchRef.current?.focus();
+        focusSearch();
+        return;
+      }
+      if (isTyping(e.target)) return;
+
+      if (e.key === "/") {
+        e.preventDefault();
+        focusSearch();
+        return;
+      }
+      if (e.key === "g") {
+        leader = true;
+        if (leaderTimer) clearTimeout(leaderTimer);
+        leaderTimer = setTimeout(() => { leader = false; }, 900);
+        return;
+      }
+      if (leader) {
+        const map: Record<string, string> = {
+          h: "/",
+          b: "/blocks",
+          v: "/validators",
+          t: "/tokens",
+          l: "/leaderboard/account/holders",
+        };
+        const dest = map[e.key];
+        if (dest) {
+          e.preventDefault();
+          router.push(dest as "/" | "/blocks" | "/validators" | "/tokens" | "/leaderboard/account/holders");
+        }
+        leader = false;
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+    // router is a stable intl object; safe to omit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Close dropdowns on outside click
@@ -84,11 +138,12 @@ export function Header() {
     setLangOpen(false);
   }
 
-  const NAV_LINKS: { href: "/blocks" | "/validators" | "/tokens" | "/"; key: keyof IntlMessages["nav"] }[] = [
+  const NAV_LINKS: { href: "/blocks" | "/validators" | "/tokens" | "/" | "/analytics"; key: keyof IntlMessages["nav"] }[] = [
     { href: "/", key: "home" },
     { href: "/blocks", key: "blocks" },
     { href: "/validators", key: "validators" },
     { href: "/tokens", key: "tokens" },
+    { href: "/analytics", key: "analytics" },
   ];
 
   const LEADERBOARD_ITEMS = [
@@ -173,9 +228,11 @@ export function Header() {
           </div>
         </nav>
 
-        {/* Search — hidden on home (hero owns the search) */}
+        {/* Search — hidden on home (hero owns the search); dropdown shows a typed-hint so the
+            user knows what the raw input maps to (block height / tx hash / address) and can
+            jump without submitting the form. */}
         {!isHome && (
-          <form onSubmit={handleSearch} className="flex-1 max-w-md hidden lg:flex">
+          <form onSubmit={handleSearch} className="flex-1 max-w-md hidden lg:flex relative">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--tx-d)]" />
               <input
@@ -190,6 +247,7 @@ export function Header() {
                 ⌘K
               </kbd>
             </div>
+            <SearchHint query={query} onPick={() => { setQuery(""); searchRef.current?.blur(); }} />
           </form>
         )}
         {isHome && <div className="flex-1 hidden lg:block" />}
@@ -325,5 +383,85 @@ export function Header() {
         </div>
       )}
     </header>
+  );
+}
+
+// Search autocomplete — single live hint under the input that shows what the current query
+// maps to (block height / tx / address / unknown). Pressing Enter submits the form; clicking
+// the hint navigates directly and clears the input.
+function SearchHint({ query, onPick }: { query: string; onPick: () => void }) {
+  const router = useRouter();
+  const q = query.trim();
+  if (!q) return null;
+
+  const hint = (() => {
+    if (/^\d+$/.test(q)) return { label: "Block", href: `/blocks/${q}`, icon: BlocksIcon };
+    if (/^0x[a-fA-F0-9]{64}$/.test(q)) return { label: "Transaction", href: `/tx/${q}`, icon: FileCode };
+    if (/^0x[a-fA-F0-9]{40}$/.test(q)) return { label: "Address", href: `/address/${q}`, icon: Users };
+    if (/^SRC20_[a-fA-F0-9]{40}$/i.test(q)) return { label: "Token", href: `/tokens/${q}`, icon: Coins };
+    return null;
+  })();
+
+  if (!hint) {
+    return (
+      <div className="absolute left-0 right-0 top-full mt-1 bg-[var(--bk)]/95 backdrop-blur-xl border border-[var(--brd)] rounded-lg shadow-[0_10px_40px_rgba(0,0,0,.3)] p-3 z-50 text-xs text-muted-foreground">
+        Press Enter to search across blocks, txs, and addresses.
+      </div>
+    );
+  }
+
+  const Icon = hint.icon;
+
+  return (
+    <button
+      type="button"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        router.push(hint.href as "/blocks/${string}" | "/tx/${string}" | "/address/${string}" | "/tokens/${string}");
+        onPick();
+      }}
+      className="absolute left-0 right-0 top-full mt-1 bg-[var(--bk)]/95 backdrop-blur-xl border border-[var(--brd)] rounded-lg shadow-[0_10px_40px_rgba(0,0,0,.3)] p-3 z-50 flex items-center gap-3 hover:border-[var(--gold)]/40 transition-colors text-left"
+    >
+      <Icon className="h-4 w-4 text-[var(--gold)]" />
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] font-mono tracking-[.15em] uppercase text-[var(--tx-d)]">{hint.label}</div>
+        <div className="text-xs font-mono truncate">{q}</div>
+      </div>
+      <kbd className="text-[10px] font-mono text-[var(--tx-d)] border border-[var(--brd)] rounded px-1.5 py-0.5">↵</kbd>
+    </button>
+  );
+}
+
+// Mobile bottom nav — 5-slot app-style tabbar so the core destinations stay one tap away
+// without opening the hamburger. Hidden on md+; the desktop nav takes over there.
+export function MobileBottomNav() {
+  const pathname = usePathname();
+  const ITEMS = [
+    { href: "/" as const, label: "Home", icon: HomeIcon },
+    { href: "/blocks" as const, label: "Blocks", icon: BlocksIcon },
+    { href: "/validators" as const, label: "Validators", icon: Shield },
+    { href: "/tokens" as const, label: "Tokens", icon: Coins },
+    { href: "/analytics" as const, label: "Analytics", icon: BarChart3 },
+  ];
+  return (
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--bk)]/95 backdrop-blur-xl border-t border-[var(--brd)] pb-[env(safe-area-inset-bottom)]">
+      <div className="grid grid-cols-5">
+        {ITEMS.map(({ href, label, icon: Icon }) => {
+          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex flex-col items-center justify-center gap-0.5 py-2.5 text-[10px] tracking-[.1em] uppercase transition-colors ${
+                active ? "text-[var(--gold)]" : "text-[var(--tx-d)] hover:text-[var(--tx-m)]"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

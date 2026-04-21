@@ -239,10 +239,26 @@ html.dark ::selection {
   .animate-marquee { animation: none; }
 }
 
-/* Smooth transitions between themes */
-html, body, .bg-card, .bg-background, .bg-muted,
-.text-foreground, .text-muted-foreground, .border-border {
-  transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+/* Smooth transitions between themes — widened so every surface (cards, borders, text, svgs)
+   cross-fades together instead of a staggered flash. */
+html, body, header, main, footer, nav, aside, section, article,
+.bg-card, .bg-background, .bg-muted, .bg-primary,
+.text-foreground, .text-muted-foreground, .text-primary,
+.border-border, .border-border\/60, .border-primary,
+svg, input, button, select, textarea {
+  transition: background-color 280ms cubic-bezier(.4,0,.2,1),
+              border-color 280ms cubic-bezier(.4,0,.2,1),
+              color 280ms cubic-bezier(.4,0,.2,1),
+              fill 280ms cubic-bezier(.4,0,.2,1),
+              stroke 280ms cubic-bezier(.4,0,.2,1);
+}
+/* Respect reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  html, body, header, main, footer, nav, aside, section, article,
+  .bg-card, .bg-background, .bg-muted, .bg-primary,
+  .text-foreground, .text-muted-foreground, .text-primary,
+  .border-border, .border-border\/60, .border-primary,
+  svg, input, button, select, textarea { transition: none; }
 }
 
 /* ===== Zebra + row-hover table utilities ===== */

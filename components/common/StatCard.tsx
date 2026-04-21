@@ -17,13 +17,36 @@ interface StatCardProps {
   accent?: string;
   /** Title tooltip on the value (useful when long values truncate). */
   title?: string;
+  /** Optional time-series (recent window) rendered as a micro sparkline below the number. */
+  spark?: number[];
+}
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const max = Math.max(1, ...data);
+  const min = Math.min(0, ...data);
+  const range = max - min || 1;
+  const W = 100;
+  const H = 24;
+  const step = W / Math.max(1, data.length - 1);
+  const path = data.map((v, i) => {
+    const x = i * step;
+    const y = H - ((v - min) / range) * H;
+    return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(" ");
+  const fill = `${path} L ${W},${H} L 0,${H} Z`;
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-6 overflow-visible" preserveAspectRatio="none" aria-hidden="true">
+      <path d={fill} fill={color} opacity="0.12" />
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 // DECISION: the landing-style stat card is the brand's signature numeric treatment —
 // Playfair serif number, tinted em-unit, animated gold corner lines on hover. One primitive
 // so every page (home + detail summary rows) reads from the same vocabulary instead of
 // shadcn's grey `text-lg font-semibold font-mono`.
-export function StatCard({ label, value, loading = false, accent = "var(--gold)", title }: StatCardProps) {
+export function StatCard({ label, value, loading = false, accent = "var(--gold)", title, spark }: StatCardProps) {
   const { num, unit } = splitValue(value);
 
   return (
@@ -64,6 +87,11 @@ export function StatCard({ label, value, loading = false, accent = "var(--gold)"
           </>
         )}
       </div>
+      {spark && spark.length > 1 && !loading && (
+        <div className="mt-3 -mx-1">
+          <Sparkline data={spark} color={accent} />
+        </div>
+      )}
     </div>
   );
 }

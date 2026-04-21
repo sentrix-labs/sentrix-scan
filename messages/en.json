@@ -5,6 +5,7 @@
     "validators": "Validators",
     "tokens": "Tokens",
     "leaderboard": "Leaderboard",
+    "analytics": "Analytics",
     "search_placeholder": "Search by block / tx / address..."
   },
   "leaderboard": {

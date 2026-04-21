@@ -104,6 +104,11 @@ export default function HomePage() {
     ? formatNumber(stats.total_transactions)
     : estimateTotalTransactions(stats?.total_blocks, blocks);
 
+  // Micro-sparkline series from the /chain/performance points. Reused across a few hero cards.
+  const tpsSpark = performance?.points?.map((p) => p.tps) ?? [];
+  const blockTimeSpark = performance?.points?.map((p) => p.block_time_sec) ?? [];
+  const txCountSpark = performance?.points?.map((p) => p.tx_count) ?? [];
+
   // Idle detection: if the newest polled block is older than 2 minutes, the chain is paused
   // and TPS is genuinely zero — distinguish "idle chain" from "active but 0 tx" so the card
   // reads as "0 — because nothing is happening" rather than "— no data".
@@ -196,6 +201,7 @@ export default function HomePage() {
               value={liveTps}
               loading={!blocks}
               accent={tpsAccent}
+              spark={isChainIdle ? undefined : tpsSpark}
               title={isChainIdle && latestBlockAgeSec !== null ? `Chain paused — last block ${latestBlockAgeSec < 3600 ? `${Math.round(latestBlockAgeSec / 60)}m` : `${(latestBlockAgeSec / 3600).toFixed(1)}h`} ago` : undefined}
             />
             <StatCard label={t("stats.block_height")} value={stats ? stats.height.toLocaleString() : "—"} loading={statsLoading} accent="var(--cyan)" />
@@ -204,9 +210,16 @@ export default function HomePage() {
               value={isChainIdle ? "—" : blockTime}
               loading={!blocks}
               accent={isChainIdle ? "var(--orange)" : "var(--teal)"}
+              spark={isChainIdle ? undefined : blockTimeSpark}
               title={isChainIdle ? "Chain paused — block time stale" : undefined}
             />
-            <StatCard label={t("stats.total_transactions")} value={totalTxValue} loading={statsLoading && !blocks} accent="var(--blue)" />
+            <StatCard
+              label={t("stats.total_transactions")}
+              value={totalTxValue}
+              loading={statsLoading && !blocks}
+              accent="var(--blue)"
+              spark={isChainIdle ? undefined : txCountSpark}
+            />
             {/* Row 2 — chain state */}
             <StatCard label={t("stats.active_validators")} value={stats ? String(stats.active_validators) : "—"} loading={statsLoading} accent="var(--purple)" />
             <StatCard label={t("stats.tokens_deployed")} value={stats ? String(stats.deployed_tokens) : "—"} loading={statsLoading} accent="var(--lime)" />

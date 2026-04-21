@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NetworkProvider } from "@/lib/network-context";
 import { LabelBootstrap } from "@/components/layout/label-bootstrap";
-import { Header } from "@/components/layout/header";
+import { Header, MobileBottomNav } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Toaster } from "@/components/layout/toaster";
 import { routing } from "@/i18n/routing";
@@ -33,8 +33,9 @@ export default async function LocaleLayout({
             <NetworkProvider>
               <LabelBootstrap>
                 <Header />
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 pb-16 md:pb-0">{children}</main>
                 <Footer />
+                <MobileBottomNav />
                 <Toaster />
               </LabelBootstrap>
             </NetworkProvider>

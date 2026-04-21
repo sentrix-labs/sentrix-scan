@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { Wallet, ArrowDown, ArrowUp, ArrowLeftRight, FileCode } from "lucide-react";
+import { Wallet, ArrowDown, ArrowUp, ArrowLeftRight, FileCode, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +19,9 @@ import { useAddress, useAddressHistory, useAccountTokens, useEventLogs } from "@
 import { formatSRX, formatNumber } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { useAddressLabel, toneForKind } from "@/lib/labels";
+import { AddressNote } from "@/components/common/AddressNote";
+import { downloadCsv } from "@/lib/csv";
+import { toMillis } from "@/lib/format";
 
 type DirFilter = "all" | "in" | "out";
 
@@ -58,8 +61,11 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
       {/* Address bar */}
       <div className="flex items-center gap-2 bg-muted/40 rounded-lg p-3 border border-border/60">
         <span className="text-sm font-mono break-all flex-1" data-address={addr}>{addr}</span>
-        <Copyable text={addr} bare />
+        <Copyable text={addr} bare label="Address" />
       </div>
+
+      {/* Private note (localStorage, stays in-browser) */}
+      <AddressNote address={addr} />
 
       {/* Balance card */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -94,8 +100,8 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
         <TabsContent value="history">
           <Card>
             <CardContent className="p-0">
-              {/* Filter bar */}
-              <div className="flex items-center gap-2 p-3 border-b border-border">
+              {/* Filter bar + CSV export */}
+              <div className="flex items-center gap-2 p-3 border-b border-border flex-wrap">
                 <span className="text-xs text-muted-foreground mr-2">Filter:</span>
                 {(["all", "in", "out"] as const).map((f) => (
                   <button
@@ -110,6 +116,32 @@ export default function AddressDetailPage({ params }: { params: Promise<{ addr: 
                     {f === "all" ? "All" : f === "in" ? "Inbound" : "Outbound"}
                   </button>
                 ))}
+                <div className="ml-auto">
+                  <button
+                    type="button"
+                    disabled={!filtered.length}
+                    onClick={() => {
+                      const rows = filtered.map((tx) => ({
+                        tx_hash: tx.id,
+                        direction: tx.to.toLowerCase() === addr.toLowerCase() ? "in" : "out",
+                        from: tx.from,
+                        to: tx.to,
+                        amount_srx: tx.amount,
+                        fee_srx: tx.fee,
+                        block_height: tx.block_height ?? "",
+                        timestamp: new Date(toMillis(tx.timestamp)).toISOString(),
+                      }));
+                      downloadCsv(`sentrix-${addr.slice(0, 10)}-page${page}.csv`, rows, [
+                        "tx_hash", "direction", "from", "to", "amount_srx", "fee_srx", "block_height", "timestamp",
+                      ]);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-md border border-border text-muted-foreground hover:bg-accent hover:text-[var(--gold)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    title="Download visible transactions as CSV"
+                  >
+                    <Download className="h-3 w-3" />
+                    Export CSV
+                  </button>
+                </div>
               </div>
               {historyLoading && !history ? (
                 <div className="p-4 space-y-2">
