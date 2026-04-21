@@ -38,10 +38,11 @@ export function ValidatorChart({ data }: { data: { hour: string; count: number }
             type="monotone"
             dataKey="count"
             stroke="var(--gold)"
-            strokeWidth={2.5}
+            strokeWidth={3}
             fill="url(#v-grad)"
-            filter="url(#v-glow)"
-            dot={{ r: 2.5, fill: "var(--gold)", stroke: "var(--bk)", strokeWidth: 1.5 }}
+            connectNulls
+            isAnimationActive={false}
+            dot={{ r: 2, fill: "var(--gold)", stroke: "var(--bk)", strokeWidth: 1 }}
             activeDot={{ r: 5, fill: "var(--gold)", stroke: "var(--bk)", strokeWidth: 2 }}
           />
         </AreaChart>

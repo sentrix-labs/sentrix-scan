@@ -170,20 +170,34 @@ export default function ValidatorDetailPage({ params }: { params: Promise<{ addr
         </TabsList>
 
         <TabsContent value="overview">
+          {/* Only render rows that actually have data. Stake/Commission/Uptime/Rewards are
+              DPoS fields the PoA backend omits — listing them as '-' just reads as broken. */}
           <Card>
             <CardContent className="px-6 py-0">
               <InfoRow label="Name" value={validator.name ?? "-"} />
               <InfoRow label="Address" value={<Address address={validator.address} truncate={false} />} />
               <InfoRow label="Status" value={<span className={`inline-flex items-center gap-1.5 text-sm ${st.color}`}>{st.icon}{st.text}</span>} />
-              <InfoRow label="Stake" value={<span className="font-mono">{validator.stake !== undefined ? `${formatNumber(validator.stake)} SRX` : "-"}</span>} />
-              <InfoRow label="Commission" value={<span className="font-mono">{validator.commission !== undefined ? `${validator.commission}%` : "-"}</span>} />
-              <InfoRow label="Uptime" value={<span className="font-mono">{validator.uptime !== undefined ? `${validator.uptime.toFixed(1)}%` : "-"}</span>} />
-              <InfoRow label="Blocks Produced" value={<span className="font-mono">{validator.blocks_produced !== undefined ? formatNumber(validator.blocks_produced) : "-"}</span>} />
+              {validator.stake !== undefined && (
+                <InfoRow label="Stake" value={<span className="font-mono">{formatNumber(validator.stake)} SRX</span>} />
+              )}
+              {validator.commission !== undefined && (
+                <InfoRow label="Commission" value={<span className="font-mono">{validator.commission}%</span>} />
+              )}
+              {validator.uptime !== undefined && (
+                <InfoRow label="Uptime" value={<span className="font-mono">{validator.uptime.toFixed(1)}%</span>} />
+              )}
               <InfoRow
-                label="Rewards Earned"
-                value={<span className="font-mono">{validator.rewards_earned !== undefined ? `${formatNumber(validator.rewards_earned)} SRX` : "-"}</span>}
-                last
+                label="Blocks Produced"
+                value={<span className="font-mono">{validator.blocks_produced !== undefined ? formatNumber(validator.blocks_produced) : "-"}</span>}
+                last={validator.rewards_earned === undefined}
               />
+              {validator.rewards_earned !== undefined && (
+                <InfoRow
+                  label="Rewards Earned"
+                  value={<span className="font-mono">{formatNumber(validator.rewards_earned)} SRX</span>}
+                  last
+                />
+              )}
             </CardContent>
           </Card>
 

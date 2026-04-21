@@ -38,6 +38,9 @@ export function LabelProvider({ network, children }: { network: NetworkId; child
 
   useEffect(() => {
     let cancelled = false;
+    // When network flips, clear the existing map immediately so stale mainnet labels don't
+    // render on testnet pages (and vice versa) during the brief refetch window.
+    setMap(new Map());
 
     async function load() {
       // Fire in parallel — all three are cheap GETs and the registry doesn't need them to
