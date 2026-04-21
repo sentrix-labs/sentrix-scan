@@ -25,6 +25,9 @@ export function AnalyticsCharts({ perf, daily }: Props) {
     blocks: d.blocks,
     transactions: d.transactions,
   }));
+  // Backend /stats/daily currently only returns today's bucket (historical = 0). Rather than
+  // rendering 13 empty bars and one spike, flag whether we have meaningful multi-day coverage.
+  const hasMultiDayData = dailySeries.filter((d) => d.blocks > 0 || d.transactions > 0).length >= 2;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -125,6 +128,8 @@ export function AnalyticsCharts({ perf, daily }: Props) {
         <CardContent className="p-4 pt-0 h-72">
           {dailySeries.length === 0 ? (
             <EmptyChart text="No daily data available yet." />
+          ) : !hasMultiDayData ? (
+            <EmptyChart text="Historical daily aggregates pending — only today's bucket is populated on the backend right now." />
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailySeries} margin={{ top: 12, right: 12, left: 0, bottom: 4 }} barGap={4}>
