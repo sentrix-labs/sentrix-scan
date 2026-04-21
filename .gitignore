@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — ignore ALL by default, only the checked-in template is allowed
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -60,3 +62,48 @@ next-env.d.ts
 /*.session.md
 /.session/
 /.handoff/
+
+# ── Public-repo safety net (extra patterns in case secrets slip through) ────
+# Private keys / certs in any form
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.keystore
+id_rsa
+id_ed25519
+*.asc
+*.gpg
+
+# Wallets / mnemonics / chain operator secrets
+wallet.json
+mnemonic*
+*.mnemonic
+seed.txt
+secrets.json
+credentials.json
+service-account*.json
+gcloud-key*.json
+aws-credentials*
+
+# Local DBs / dumps that could leak user data
+*.sqlite
+*.sqlite3
+*.db
+dump*.sql
+
+# Backups / archives named loosely
+backup*
+*.bak
+*.backup
+
+# IDE / editor local state
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS junk (already partial above)
+Thumbs.db
+desktop.ini
