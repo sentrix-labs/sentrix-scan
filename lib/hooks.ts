@@ -146,15 +146,15 @@ function usePolling<T>(
   };
 }
 
-// DECISION: backend rate-limit = 60 req/min per IP. Home alone fires ~10 polling hooks,
-// plus LabelProvider bootstrap (3) + address registry refresh. At 5s intervals that's
-// ~120 req/min — exceeds the bucket and the server returns 429 WITHOUT CORS headers,
-// which the browser reports as "CORS blocked". Slower + staggered intervals keep every
-// surface under the cap. Real-time feel preserved via optimistic render + live ticker.
+// DECISION: backend rate-limit = 60 req/min per IP. Hot home hooks (stats, blocks, txs) poll
+// every 5 s — at 0.5 s testnet block time the previous 10 s cadence felt frozen ("harus
+// refresh baru angkanya berubah"). 4 hot hooks × 12/min = 48 req/min, plus mempool@10 s,
+// perf@10 s, epoch@30 s, status@30 s ≈ 56 req/min total — fits the bucket with headroom.
+// Anything cooler stays at 15-30 s.
 export function useStats(network: NetworkId, initial: ChainInfo | null = null) {
   return usePolling<ChainInfo>(
     () => fetchChainInfo(network),
-    10000,
+    5000,
     [network],
     initial,
   );
@@ -163,7 +163,7 @@ export function useStats(network: NetworkId, initial: ChainInfo | null = null) {
 export function useBlocks(network: NetworkId, count = 10, initial: BlockData[] | null = null) {
   return usePolling<BlockData[]>(
     () => fetchLatestBlocks(network, count),
-    10000,
+    5000,
     [network, count],
     initial,
   );
@@ -180,7 +180,7 @@ export function useBlock(network: NetworkId, height: number) {
 export function useTransactions(network: NetworkId, count = 10, initial: TransactionData[] | null = null) {
   return usePolling<TransactionData[]>(
     () => fetchLatestTransactions(network, count),
-    10000,
+    5000,
     [network, count],
     initial,
   );
@@ -249,7 +249,7 @@ export function useChainPerformance(
 ) {
   return usePolling<ChainPerformance>(
     () => fetchChainPerformance(network, range),
-    15000,
+    10000,
     [network, range],
     initial,
   );
@@ -290,7 +290,7 @@ export function useValidatorDelegators(network: NetworkId, address: string) {
 export function useMempool(network: NetworkId, initial: MempoolSnapshot | null = null) {
   return usePolling<MempoolSnapshot>(
     () => fetchMempool(network),
-    10000,
+    5000,
     [network],
     initial,
   );
