@@ -37,13 +37,18 @@ function usePolling<T>(
   fetcher: () => Promise<T | null>,
   interval: number,
   deps: unknown[] = [],
+  initialData: T | null = null,
 ): UsePollingReturn<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [status, setStatus] = useState<FetchStatus>(FetchStatus.Idle);
-  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const [data, setData] = useState<T | null>(initialData);
+  const [status, setStatus] = useState<FetchStatus>(initialData != null ? FetchStatus.Fetched : FetchStatus.Idle);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(initialData != null ? Date.now() : null);
   const inFlight = useRef(false);
   const failures = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // DECISION: track whether the initial render already consumed `initialData`. On the first
+  // mount we want to skip the immediate refetch (the server-rendered values are fresh), but
+  // any subsequent dep change (e.g. user toggles network) must clear and refetch.
+  const skipFirstRefetch = useRef(initialData != null);
 
   const refetch = useCallback(async () => {
     if (inFlight.current) return;
@@ -76,16 +81,24 @@ function usePolling<T>(
 
   useEffect(() => {
     // DECISION: when deps (e.g. network) change, clear stale data so the UI shows skeletons
-    // instead of last-network values while the new fetch is in flight.
-    setData(null);
-    setStatus(FetchStatus.Fetching);
+    // instead of last-network values while the new fetch is in flight. On the very first mount
+    // with SSR-provided initialData we keep the data and skip the immediate refetch — the
+    // server values are fresh enough; the first poll fires after the normal interval.
+    if (skipFirstRefetch.current) {
+      skipFirstRefetch.current = false;
+    } else {
+      setData(null);
+      setStatus(FetchStatus.Fetching);
+    }
     failures.current = 0;
     // DECISION: small 0-80ms jitter on initial fetch. Enough to desync mount bursts across
     // ~10 hooks (avoids identical request timestamps) without visibly delaying first paint.
     // Prior value of 0-400ms was insurance for the backend rate-limit flood; that flood was
     // resolved server-side and the initial burst now fits well under the 60 req/min cap.
     const initialJitter = Math.floor(Math.random() * 80);
-    const jitterTimer = setTimeout(() => { refetch(); }, initialJitter);
+    const jitterTimer = data != null && status === FetchStatus.Fetched
+      ? null
+      : setTimeout(() => { refetch(); }, initialJitter);
 
     function reschedule() {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -113,12 +126,13 @@ function usePolling<T>(
     }
 
     return () => {
-      clearTimeout(jitterTimer);
+      if (jitterTimer) clearTimeout(jitterTimer);
       if (timerRef.current) clearTimeout(timerRef.current);
       if (typeof document !== "undefined") {
         document.removeEventListener("visibilitychange", onVisibility);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refetch, interval]);
 
   return {
@@ -137,19 +151,21 @@ function usePolling<T>(
 // ~120 req/min — exceeds the bucket and the server returns 429 WITHOUT CORS headers,
 // which the browser reports as "CORS blocked". Slower + staggered intervals keep every
 // surface under the cap. Real-time feel preserved via optimistic render + live ticker.
-export function useStats(network: NetworkId) {
+export function useStats(network: NetworkId, initial: ChainInfo | null = null) {
   return usePolling<ChainInfo>(
     () => fetchChainInfo(network),
     10000,
-    [network]
+    [network],
+    initial,
   );
 }
 
-export function useBlocks(network: NetworkId, count = 10) {
+export function useBlocks(network: NetworkId, count = 10, initial: BlockData[] | null = null) {
   return usePolling<BlockData[]>(
     () => fetchLatestBlocks(network, count),
     10000,
-    [network, count]
+    [network, count],
+    initial,
   );
 }
 
@@ -161,11 +177,12 @@ export function useBlock(network: NetworkId, height: number) {
   );
 }
 
-export function useTransactions(network: NetworkId, count = 10) {
+export function useTransactions(network: NetworkId, count = 10, initial: TransactionData[] | null = null) {
   return usePolling<TransactionData[]>(
     () => fetchLatestTransactions(network, count),
     10000,
-    [network, count]
+    [network, count],
+    initial,
   );
 }
 
@@ -225,11 +242,16 @@ export function useTokenHolders(network: NetworkId, contract: string, limit = 50
   );
 }
 
-export function useChainPerformance(network: NetworkId, range: "1m" | "5m" | "15m" | "1h" | "24h" = "1h") {
+export function useChainPerformance(
+  network: NetworkId,
+  range: "1m" | "5m" | "15m" | "1h" | "24h" = "1h",
+  initial: ChainPerformance | null = null,
+) {
   return usePolling<ChainPerformance>(
     () => fetchChainPerformance(network, range),
     15000,
     [network, range],
+    initial,
   );
 }
 
@@ -265,27 +287,30 @@ export function useValidatorDelegators(network: NetworkId, address: string) {
   );
 }
 
-export function useMempool(network: NetworkId) {
+export function useMempool(network: NetworkId, initial: MempoolSnapshot | null = null) {
   return usePolling<MempoolSnapshot>(
     () => fetchMempool(network),
     10000,
     [network],
+    initial,
   );
 }
 
-export function useCurrentEpoch(network: NetworkId) {
+export function useCurrentEpoch(network: NetworkId, initial: EpochInfo | null = null) {
   return usePolling<EpochInfo>(
     () => fetchCurrentEpoch(network),
     30000,
     [network],
+    initial,
   );
 }
 
-export function useChainStatus(network: NetworkId) {
+export function useChainStatus(network: NetworkId, initial: ChainStatus | null = null) {
   return usePolling<ChainStatus>(
     () => fetchChainStatus(network),
     30000,
     [network],
+    initial,
   );
 }
 

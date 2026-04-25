@@ -5,14 +5,21 @@ import { getApiUrl, type NetworkId } from "./chain";
 const SENTRI_PER_SRX = 100_000_000;
 const toSrx = (sentri: number): number => sentri / SENTRI_PER_SRX;
 
-async function apiFetch<T>(network: NetworkId, path: string): Promise<T | null> {
+// DECISION: timeout is bounded by an AbortController. Default 8s for client polls (matches the
+// browser's typical idle timeout). SSR callers should pass a tight value (e.g. 1500ms) so a
+// slow upstream cannot stall page render past the user's patience window.
+async function apiFetch<T>(network: NetworkId, path: string, timeoutMs = 8000): Promise<T | null> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const base = getApiUrl(network);
-    const res = await fetch(`${base}${path}`, { cache: "no-store" });
+    const res = await fetch(`${base}${path}`, { cache: "no-store", signal: ctrl.signal });
     if (!res.ok) return null;
     return await res.json();
   } catch {
     return null;
+  } finally {
+    clearTimeout(t);
   }
 }
 
@@ -652,4 +659,49 @@ export async function fetchAccountsTop(network: NetworkId, limit = 100): Promise
     label: a.name ?? undefined,
     tx_count: a.tx_count,
   }));
+}
+
+// ── SSR home bundle ─────────────────────────────────────────────────────────
+// DECISION: gather everything the home shell needs in one parallel fetch with a tight per-call
+// timeout, so the server can hand the browser a fully-painted page instead of a skeleton that
+// has to wait for ~10 client-side fetches over Starlink-grade latency. Anything that times out
+// comes back as null and the client polling hooks resolve it shortly after hydration.
+export interface HomeBundle {
+  stats: ChainInfo | null;
+  blocks: BlockData[] | null;
+  txs: TransactionData[] | null;
+  status: ChainStatus | null;
+  mempool: MempoolSnapshot | null;
+  epoch: EpochInfo | null;
+  performance: ChainPerformance | null;
+}
+
+export async function fetchHomeBundle(network: NetworkId, timeoutMs = 1500): Promise<HomeBundle> {
+  const [stats, blocksRaw, txsRaw, status, mempool, epoch, performance] = await Promise.all([
+    apiFetch<ChainInfo>(network, "/chain/info", timeoutMs),
+    apiFetch<{ blocks: BlockData[] }>(network, "/chain/blocks?limit=10", timeoutMs),
+    apiFetch<{ transactions: Array<{ txid: string; from: string; to: string; amount: number; fee: number; block_index: number; block_timestamp: number; timestamp?: number; is_coinbase?: boolean; status?: string }> } | Array<{ txid: string; from: string; to: string; amount: number; fee: number; block_index: number; block_timestamp: number; timestamp?: number; is_coinbase?: boolean; status?: string }>>(network, "/transactions?limit=10", timeoutMs),
+    apiFetch<ChainStatus>(network, "/sentrix_status", timeoutMs),
+    apiFetch<MempoolSnapshot>(network, "/mempool", timeoutMs),
+    apiFetch<EpochInfo>(network, "/epoch/current", timeoutMs),
+    apiFetch<ChainPerformance>(network, "/chain/performance?range=1h", timeoutMs),
+  ]);
+
+  const blocks = blocksRaw?.blocks ?? null;
+  const txsArr = !txsRaw ? null : (Array.isArray(txsRaw) ? txsRaw : (txsRaw.transactions ?? []));
+  const txs: TransactionData[] | null = txsArr === null ? null : txsArr.map((t) => ({
+    id: t.txid,
+    from: t.from,
+    to: t.to,
+    amount: toSrx(t.amount ?? 0),
+    fee: toSrx(t.fee ?? 0),
+    timestamp: String(t.timestamp ?? t.block_timestamp ?? 0),
+    nonce: 0,
+    signature: "",
+    block_height: t.block_index,
+    status: (t.status as TransactionData["status"]) ?? "confirmed",
+    tx_type: t.is_coinbase ? "coinbase" : undefined,
+  }));
+
+  return { stats, blocks, txs, status, mempool: mempool ?? null, epoch, performance };
 }
