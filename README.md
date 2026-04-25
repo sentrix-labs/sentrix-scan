@@ -1,101 +1,34 @@
-# Sentrix Scan
+# Sentrix Scan — moved
 
-Block explorer for Sentrix Chain (SRX) — browse blocks, transactions, addresses, validators, and SRC-20 tokens.
+> ## ⚠ This repository has moved.
+>
+> SentrixScan now lives in the SentrisCloud frontend monorepo:
+>
+> **[`sentriscloud/frontend`](https://github.com/Sentriscloud/frontend) → [`apps/scan/`](https://github.com/Sentriscloud/frontend/tree/main/apps/scan)**
+>
+> All future development, issues, and pull requests should go there.
+> This repository is kept read-only for historical reference.
 
-**Mainnet:** https://sentrixscan.sentriscloud.com
-**Testnet:** https://testnet-scan.sentriscloud.com
+---
 
-## Tech Stack
+## Why the move
 
-- Next.js 15 (App Router, standalone output)
-- TypeScript
-- Tailwind CSS 4 + shadcn/ui
-- lucide-react (icons)
-- recharts (charts — ready for future tx/gas charts)
-- viem (EVM RPC client)
-- next-themes (dark/light mode)
-- No database — queries chain RPC + REST API directly
+Per the SentrisCloud architecture decision (April 2026), all user-facing TypeScript apps consolidate into a single `pnpm` + Turborepo monorepo at `sentriscloud/frontend`. The `sentrix-labs` org is reserved for the protocol foundation (chain core, SDKs, brand assets); products live under the `sentriscloud` org.
 
-## Architecture
+## Live deployments
 
-```
-app/
-├── page.tsx                Home — stats dashboard + latest blocks/tx
-├── blocks/
-│   ├── page.tsx            All blocks list
-│   └── [height]/page.tsx   Block detail
-├── tx/
-│   └── [hash]/page.tsx     Transaction detail
-├── address/
-│   └── [addr]/page.tsx     Account detail (balance, history)
-├── validators/
-│   └── page.tsx            Validators list
-├── tokens/
-│   ├── page.tsx            SRC-20 tokens list
-│   └── [addr]/page.tsx     Token detail
-└── search/
-    └── page.tsx            Smart search
+These continue to run from the new location:
 
-lib/
-├── chain.ts                viem chain definitions (mainnet + testnet)
-├── api.ts                  REST API client
-├── hooks.ts                React hooks with polling
-├── format.ts               Number/hash/time formatting
-├── network-context.tsx     Network switcher context
-└── utils.ts                shadcn utilities
-```
+- **Mainnet:** https://sentrixscan.sentriscloud.com
+- **Testnet:** https://testnet-scan.sentriscloud.com
 
-## Features
+## Where to find what was here
 
-- Real-time stats (5s polling)
-- Smart search (block height / tx hash / address auto-detect)
-- Network switcher (Mainnet / Testnet)
-- Dark mode default + light toggle
-- Copy-to-clipboard on all hashes and addresses
-- Relative timestamps with hover for absolute
-- Responsive (mobile, tablet, desktop)
-- No database dependency
+| Old path | New path |
+| --- | --- |
+| `sentrix-labs/sentrix-scan` (root) | `sentriscloud/frontend/apps/scan/` |
+| `app/`, `components/`, `lib/` | same, under `apps/scan/` |
+| `package.json` (`"name": "sentrix-scan"`) | `apps/scan/package.json` (`"name": "@sentriscloud/scan"`) |
+| Standalone `pnpm install` | Workspace-level: `pnpm install` at monorepo root |
 
-## Local Development
-
-```bash
-pnpm install
-cp .env.example .env.local
-pnpm dev
-```
-
-Open http://localhost:3000
-
-## Environment Variables
-
-| Variable | Description | Default |
-|---|---|---|
-| NEXT_PUBLIC_MAINNET_RPC | Mainnet JSON-RPC | sentrix-rpc.sentriscloud.com/rpc |
-| NEXT_PUBLIC_MAINNET_API | Mainnet REST API | sentrix-api.sentriscloud.com |
-| NEXT_PUBLIC_MAINNET_CHAIN_ID | Mainnet chain ID | 7119 |
-| NEXT_PUBLIC_TESTNET_RPC | Testnet JSON-RPC | testnet-rpc.sentriscloud.com/rpc |
-| NEXT_PUBLIC_TESTNET_API | Testnet REST API | testnet-api.sentriscloud.com |
-| NEXT_PUBLIC_TESTNET_CHAIN_ID | Testnet chain ID | 7120 |
-| NEXT_PUBLIC_DEFAULT_NETWORK | Default network | mainnet |
-
-## Build
-
-```bash
-pnpm build
-```
-
-## Deploy
-
-### Systemd
-
-```
-Port 3006 (mainnet), Port 3007 (testnet)
-HOSTNAME=127.0.0.1 (bind localhost only, Nginx reverse proxy)
-```
-
-### Nginx
-
-```
-sentrixscan.sentriscloud.com → 127.0.0.1:3006
-testnet-scan.sentriscloud.com → 127.0.0.1:3007
-```
+Git history is preserved in the monorepo as a squashed migration commit.
